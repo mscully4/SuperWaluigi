@@ -13,10 +13,9 @@ class TileMap : public sf::Transformable, public sf::Drawable {
 		sf::Texture m_texture;
 		sf::Transform m_transform;
 		sf::VertexArray m_vertices;
-		TileMap(const int map_width, const int map_height, const int tile_width, const int tile_height);
+		TileMap(const string& sprite_sheet, vector<vector<int>>&, const int tile_width, const int tile_height);
 		const int tile_width = tile_width;
 		const int tile_height = tile_height;
-		vector<vector<Tile>> map;
 		vector<vector<int>> level;
 	private:
 		void draw(sf::RenderTarget& target, sf::RenderStates states) const;

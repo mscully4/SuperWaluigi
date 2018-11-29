@@ -5,7 +5,7 @@
 
 using namespace std; 
 
-Player::Player(const std::string& textureFile, double i_x, double i_y, double sprite_width, double sprite_height) {
+Player::Player(const std::string& textureFile, double x_pos, double y_pos, double sprite_width, double sprite_height) {
 	m_scale[0] = 1.0f;
 	m_scale[1] = 1.0f;
 	
@@ -13,10 +13,10 @@ Player::Player(const std::string& textureFile, double i_x, double i_y, double sp
 	m_vertices.setPrimitiveType(sf::Quads);
 	m_vertices.resize(sprite_width * sprite_height * 4);
 
-	m_vertices[0].position = sf::Vector2f(i_x, i_y);
-	m_vertices[1].position = sf::Vector2f(i_x + sprite_width, i_y);
-	m_vertices[2].position = sf::Vector2f(i_x + sprite_width, i_y + sprite_height);
-	m_vertices[3].position = sf::Vector2f(i_x, i_y + sprite_height);
+	m_vertices[0].position = sf::Vector2f(x_pos, y_pos);
+	m_vertices[1].position = sf::Vector2f(x_pos + sprite_width, y_pos);
+	m_vertices[2].position = sf::Vector2f(x_pos + sprite_width, y_pos + sprite_height);
+	m_vertices[3].position = sf::Vector2f(x_pos, y_pos + sprite_height);
 
 	m_vertices[0].texCoords = sf::Vector2f(0, 0);
 	m_vertices[1].texCoords = sf::Vector2f(sprite_width, 0);
@@ -78,4 +78,6 @@ void Player::update(double delta_time, const int map_width, const int map_height
 
 	m_center_pos[0] = m_vertices[0].position.x + m_half_size[0];
 	m_center_pos[1] = m_vertices[0].position.y + m_half_size[1];
+//	cout << "(" << m_vertices[2].position.x << "," << m_vertices[2].position.y << ") ("
+//	<< m_vertices[3].position.x << "," << m_vertices[3].position.y << ")" << endl;
 }
