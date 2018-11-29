@@ -30,13 +30,7 @@ void Goomba::update(double &delta_time, Player * player) {
       m_vertices[i].position.x += x_vel * delta_time;
     }
   }*/
-  left = player->m_vertices[0].position.x;
-  right = player->m_vertices[2].position.x;
-  up = player->m_vertices[0].position.y;
-  down = player->m_vertices[2].position.y;
-  if (player->m_vertices[0].position.x < m_vertices[1].position.x && player->m_vertices[2].position.x > m_vertices[0].position.x && player->m_vertices[0].position.y < m_vertices[2].position.y && player->m_vertices[2].position.y > m_vertices[0].position.y) {
-    cout << "Collision" << endl;
-  } else {
-    cout << " " << endl;
+  if (player->m_vertices[0].position.y == m_vertices[1].position.y) {
+    cout << "HIT" << endl;
   }
 }

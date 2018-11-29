@@ -10,8 +10,8 @@
 using namespace std;
 
 int main() {
-	int window_width = 1260;
-	int window_height = 600;
+	int window_width = 1200;
+	int window_height = 800;
 	const int tile_width = 32;
 	const int tile_height = 32;
 	const double map_scale = 2;
