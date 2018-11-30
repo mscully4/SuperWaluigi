@@ -30,13 +30,38 @@ void Goomba::update(double &delta_time, Player * player) {
       m_vertices[i].position.x += x_vel * delta_time;
     }
   }*/
-  left = player->m_vertices[0].position.x;
-  right = player->m_vertices[2].position.x;
-  up = player->m_vertices[0].position.y;
-  down = player->m_vertices[2].position.y;
+  player_left = player->m_vertices[0].position.x;
+  player_right = player->m_vertices[2].position.x;
+  player_up = player->m_vertices[0].position.y;
+  player_down = player->m_vertices[2].position.y;
+  enemy_left = m_vertices[0].position.x;
+  enemy_right = m_vertices[2].position.x;
+  enemy_up = m_vertices[0].position.y;
+  enemy_down = m_vertices[2].position.y;
   if (player->m_vertices[0].position.x < m_vertices[1].position.x && player->m_vertices[2].position.x > m_vertices[0].position.x && player->m_vertices[0].position.y < m_vertices[2].position.y && player->m_vertices[2].position.y > m_vertices[0].position.y) {
-    cout << "Collision" << endl;
-  } else {
-    cout << " " << endl;
+    if (player->get_x_vel() < 0) {
+      player->m_vertices[0].position = sf::Vector2f(m_vertices[1].position.x + 25, player->m_vertices[0].position.y);
+      player->m_vertices[1].position = sf::Vector2f(m_vertices[1].position.x + player->sprite_width + 25, player->m_vertices[1].position.y);
+      player->m_vertices[2].position = sf::Vector2f(m_vertices[2].position.x + player->sprite_width + 25, player->m_vertices[2].position.y);
+      player->m_vertices[3].position = sf::Vector2f(m_vertices[2].position.x + 25, player->m_vertices[3].position.y);
+    }
+    if (player->get_x_vel() > 0) {
+      player->m_vertices[0].position = sf::Vector2f(m_vertices[0].position.x - player->sprite_width - 25, player->m_vertices[0].position.y);
+      player->m_vertices[1].position = sf::Vector2f(m_vertices[0].position.x - 25, player->m_vertices[1].position.y);
+      player->m_vertices[2].position = sf::Vector2f(m_vertices[3].position.x - 25, player->m_vertices[2].position.y);
+      player->m_vertices[3].position = sf::Vector2f(m_vertices[3].position.x - player->sprite_width - 25, player->m_vertices[3].position.y);
+    }
+    /*if (player->get_y_vel() < 0) {
+      player->m_vertices[0].position = sf::Vector2f(player->m_vertices[0].position.x, m_vertices[3].position.y);
+      player->m_vertices[1].position = sf::Vector2f(player->m_vertices[1].position.x, m_vertices[2].position.y);
+      player->m_vertices[2].position = sf::Vector2f(player->m_vertices[2].position.x, m_vertices[2].position.y + player->sprite_height);
+      player->m_vertices[3].position = sf::Vector2f(player->m_vertices[3].position.x, m_vertices[3].position.y + player->sprite_height);
+    }
+    if (player->get_y_vel() > 0) {
+      player->m_vertices[0].position = sf::Vector2f(player->m_vertices[0].position.x, m_vertices[0].position.y - player->sprite_height);
+      player->m_vertices[1].position = sf::Vector2f(player->m_vertices[1].position.x, m_vertices[1].position.y - player->sprite_height);
+      player->m_vertices[2].position = sf::Vector2f(player->m_vertices[2].position.x, m_vertices[1].position.y);
+      player->m_vertices[3].position = sf::Vector2f(player->m_vertices[3].position.x, m_vertices[0].position.y);
+    }*/
   }
 }
