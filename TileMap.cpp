@@ -6,7 +6,7 @@
 using namespace std;
 
 TileMap::TileMap(const string& sprite_sheet, vector<vector<int>>& level, const int tile_width, const int tile_height) {
-        vector<vector<int>> key = {{0, 66}, {0, 0}, {33, 0}, {0, 33}, {66, 0}, {33,33}};
+        vector<vector<int>> key = {{0, 66}, {0, 0}, {33, 0}, {0, 33}, {66, 0}, {33,33}, {164, 0}, {196, 0}, {100, 0}, {132, 0}};
 	m_texture.loadFromFile(sprite_sheet);
 	m_vertices.setPrimitiveType(sf::Quads);
 	m_vertices.resize(level.size() * level[0].size() * 4);
@@ -21,7 +21,6 @@ TileMap::TileMap(const string& sprite_sheet, vector<vector<int>>& level, const i
 			quad[2].position = sf::Vector2f((j + 1) * tile_size.x, ((i + 1) * tile_size.y));
 			quad[3].position = sf::Vector2f(j * tile_size.x, ((i + 1) * tile_size.y));
 			
-			cout << key[level[i][j] << " " << key[level[i][j]][1] << endl;
 			quad[0].texCoords = sf::Vector2f(key[level[i][j]][0], key[level[i][j]][1]);
 			quad[1].texCoords = sf::Vector2f(key[level[i][j]][0] + tile_size.x, key[level[i][j]][1]);
 			quad[2].texCoords = sf::Vector2f(key[level[i][j]][0] + tile_size.x, key[level[i][j]][1] + tile_size.y);
@@ -41,4 +40,4 @@ void TileMap::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 		// draw the vertex array
 		target.draw(m_vertices, states);
-	}
+	};
