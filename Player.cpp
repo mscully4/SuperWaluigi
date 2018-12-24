@@ -183,6 +183,25 @@ void Player::update(double delta_time, const int map_width, const int map_height
 	            minHeightReached = false;
 	            isDescending = false;
 	        }
+//
+if (level[((m_vertices[0].position.y - (speedScale * delta_time))/(2*tile_width))][(m_vertices[0].position.x)/(2*tile_width)] == 3){
+	            level[((m_vertices[0].position.y - (speedScale * delta_time) - 5)/(2*tile_width))][(m_vertices[0].position.x)/(2*tile_width)] = 5;
+	            y_vel = 0;
+	            isFalling = false;
+	            beginJump = false;
+	            minHeightReached = false;
+	            isDescending = false;
+	        }
+	        else if (level[((m_vertices[0].position.y - (speedScale * delta_time))/(2*tile_width))][(m_vertices[1].position.x)/(2*tile_width)] == 3){
+	            level[((m_vertices[0].position.y - (speedScale * delta_time) - 5)/(2*tile_width))][(m_vertices[1].position.x)/(2*tile_width)] = 5;
+	            y_vel = 0;
+	            isFalling = false;
+	            beginJump = false;
+	            minHeightReached = false;
+	            isDescending = false;
+	        }
+//
+
 	    }
 	    
 	}
