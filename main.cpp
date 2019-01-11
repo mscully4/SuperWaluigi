@@ -1,69 +1,74 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio/Sound.hpp>
+#include <SFML/Audio/SoundBuffer.hpp>
 #include <iostream>
 #include <vector>
 #include <string>
+#include <fstream>
+#include <chrono>
+#include <thread>
+#include "load_map.cpp"
 #include "Entity.h"
 #include "Player.h"
-#include "Tile.h"
 #include "TileMap.h"
 #include "Enemies.h"
 #include "Ending.h"
+#include "PowerUp.h"
 
 using namespace std;
 
 int main() {
-	int window_width = 1200;
-	int window_height = 600;
+	int window_width = sf::VideoMode().getDesktopMode().width;
+    int window_height = sf::VideoMode().getDesktopMode().height;
+    //int window_width = 1250;
+	//int window_height = 600;
 	const int tile_width = 32;
 	const int tile_height = 32;
 	const double map_scale = 2;
-vector<vector<int>> level {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,2,2,2,2,0,0,2,2,2,3,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,3,3,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0},
-{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,0,0,0,0,0,0,0},
-{0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,2,3,2,3,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,9,0,0,0,0,0,0,6,7,0,0,0,0,0,0,0,0,0,0,0,0,2,3,2,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,3,0,0,3,0,0,3,0,0,0,0,2,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,4,0,0,0,0,0,2,2,3,0,0,0,0,0,0,0,4,4,4,4,0,0,0,0,0,0,0},
-{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,7,0,0,0,0,0,0,6,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,4,0,0,0,0,0,0,0,4,4,4,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,4,4,0,0,0,0,0,0,0},
-{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,9,0,0,0,0,0,0,6,7,0,0,0,0,0,0,6,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,0,0,4,4,0,0,0,0,0,4,4,4,4,0,0,4,4,4,0,0,0,0,0,0,0,0,0,0,0,4,4,4,4,4,4,0,0,0,0,0,0,0},
-{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,7,0,0,0,0,0,0,6,7,0,0,0,0,0,0,6,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,4,0,0,4,4,4,0,0,0,4,4,4,4,4,0,0,4,4,4,4,0,0,0,0,0,0,0,0,0,4,4,4,4,4,4,4,0,0,0,0,0,0,0},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}};
-
+	vector<vector<int>> level;
+	load_map("Assets/map/1-1.txt", level);
 	const int map_rows = level[0].size();
 	const int map_columns = level.size();
 	double map_width = map_rows * tile_width * map_scale;
 	double map_height = map_columns * tile_height * map_scale;
+	int time_left = 400;
+	int time_elapsed;
 
 	sf::RenderWindow window(sf::VideoMode(window_width, window_height), "Super Waluigi");
 
 	sf::View view(sf::Vector2f(0.0f, 0.0f), sf::Vector2f(window_width, window_height));
 	sf::Clock game_clock;
+	sf::Clock timer;
 
-	Player player("Assets/images/Waluigi.png", 0, 0, 58, 106);
+    vector<PowerUp> power_ups;
+    Player player("Assets/images/rsz_waluigi_jacked.png", 0, 0, 63, 125);
 
-	Goomba goomba1("Assets/images/GOOMBA.png", 400, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
-	Goomba goomba2("Assets/images/GOOMBA.png", 1000, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
-	Goomba goomba3("Assets/images/GOOMBA.png", 2180, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
-	Goomba goomba4("Assets/images/GOOMBA.png", 2750, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
-	Goomba goomba5("Assets/images/GOOMBA.png", 3700, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
-	Goomba goomba6("Assets/images/GOOMBA.png", 5800, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
-	Goomba goomba7("Assets/images/GOOMBA.png", 8700, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
-	Goomba goomba8("Assets/images/GOOMBA.png", 9500, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
+	Goomba goomba1("Assets/images/Goomba.png", 400, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
+	Goomba goomba2("Assets/images/Goomba.png", 1000, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
+	Goomba goomba3("Assets/images/Goomba.png", 2180, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
+	Goomba goomba4("Assets/images/Goomba.png", 2750, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
+	Goomba goomba5("Assets/images/Goomba.png", 3700, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
+	Goomba goomba6("Assets/images/Goomba.png", 5800, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
+	Goomba goomba7("Assets/images/Goomba.png", 8700, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
+	Goomba goomba8("Assets/images/Goomba.png", 9500, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
 
-
-
+	sf::SoundBuffer loser_buffer;
+	loser_buffer.loadFromFile("Assets/sounds/loser.wav");
+	sf::Sound loser;
+	loser.setBuffer(loser_buffer);
 
 	Ending ending("Assets/images/SpriteSheet2.png", 4, 4, map_width, map_height);
-	//ending.scale(2, 2);
 
 	sf::Font consola_font;
-	if (!consola_font.loadFromFile("Assets/fonts/consola.ttf")) cout << "FEIHEOIFHEWOIEH" << endl;
-	sf::Text lives("Lives: ", consola_font, 50);
-	lives.setPosition(175, 300);
-	//lives.setColor(sf::Color(33, 44, 55));
+	consola_font.loadFromFile("Assets/fonts/Pixel Emulator.otf");
+	
+	sf::Text text_waluigi("WALUIGI", consola_font, 20);
+	text_waluigi.setFillColor(sf::Color(255, 255, 255));
+	sf::Text text_world("WORLD", consola_font, 20);
+	sf::Text text_level("1-1", consola_font, 20);
+	sf::Text text_time("TIME", consola_font, 20);
+	sf::Text text_seconds("400", consola_font, 20);
+
 
 	while (window.isOpen()) {
 		sf::Event event;
@@ -75,13 +80,15 @@ vector<vector<int>> level {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 		TileMap map("Assets/images/SpriteSheet2.png", level, tile_width, tile_height);
 		map.scale(map_scale, map_scale);
 
-		lives.setString("Lives Remaining: " + to_string(player.lives));
 
 		double fps = game_clock.restart().asMilliseconds();
-		float delta_time = game_clock.getElapsedTime().asSeconds();
+		time_elapsed = timer.getElapsedTime().asSeconds();
+		text_seconds.setString(to_string(time_left - time_elapsed));
+
 		view.setCenter(sf::Vector2f(player.m_center_pos[0], player.m_center_pos[1]));
 
-		player.update(fps, map_rows, map_columns, tile_width, tile_height, map_scale, level);
+		player.update(fps, map_rows, map_columns, tile_width, tile_height, map_scale, level, power_ups);
+        //cout << player.get_big() << endl;        
 
 		goomba1.update(fps, map_rows, map_columns, &player, level);
 		goomba2.update(fps, map_rows, map_columns, &player, level);
@@ -94,12 +101,26 @@ vector<vector<int>> level {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 
 		if (player.m_center_pos[0] > 0 + (window_width/2) && player.m_center_pos[0] < (map_rows * tile_width * map_scale) - (window_width/2)) {
 			view.setCenter(sf::Vector2f(player.m_center_pos[0], (map_height + (map_height - window_height)) / 2));
+	        text_waluigi.setPosition(player.m_center_pos[0] - (.4 * window_width), 310);
+            text_world.setPosition(player.m_center_pos[0] + (.1 * window_width), 310);
+			text_level.setPosition(player.m_center_pos[0] + 20 + (.1 * window_width), 340);
+	        text_time.setPosition(player.m_center_pos[0] + (.35 * window_width), 310);
+            text_seconds.setPosition(player.m_center_pos[0] + (.35 * window_width), 340);
 		} else if (player.m_center_pos[0] < 0 + (window_width / 2)) {
 			view.setCenter(sf::Vector2f((window_width / 2), (map_height + (map_height - window_height)) / 2));
+	        text_waluigi.setPosition(120, 310);
+	        text_world.setPosition(720, 310);
+			text_level.setPosition(740, 340);
+			text_time.setPosition(1020, 310);
+			text_seconds.setPosition(1020, 340);
 		} else if (player.m_center_pos[0] > (map_rows * tile_width * map_scale) - (window_width / 2)) {
 			view.setCenter(sf::Vector2f(player.m_center_pos[0], (map_height + (map_height - window_height)) / 2));
-		}
-
+	        text_waluigi.setPosition(player.m_center_pos[0] - (.1 * window_width), 310);
+	        text_world.setPosition(player.m_center_pos[0] + (.1 * window_width), 310);
+			text_level.setPosition(player.m_center_pos[0] + 20 + (.1 * window_width), 340);
+	        text_time.setPosition(player.m_center_pos[0] + (.35 * window_width), 310);
+            text_seconds.setPosition(player.m_center_pos[0] + (.35 * window_width), 340);
+	}
 
 		window.setView(view);
 		window.clear(sf::Color(80,128,255));
@@ -114,10 +135,23 @@ vector<vector<int>> level {{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 		window.draw(goomba7);
 		window.draw(goomba8);
 		window.draw(ending);
-		window.draw(lives);
+        for (int i=0; i < power_ups.size(); ++i) {
+            if (power_ups[i].get_active()) {
+                window.draw(power_ups[i]);
+            }
+        }
 
+		window.draw(text_waluigi);
+		window.draw(text_world);
+		window.draw(text_level);
+		window.draw(text_time);
+		window.draw(text_seconds);
+		
 		window.display();
-		if(player.lives < 0){
+		
+        if(!player.get_alive() || time_elapsed > time_left){
+			loser.play();
+			this_thread::sleep_for(chrono::seconds(2));
 			window.close();
 		}
 	}

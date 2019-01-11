@@ -8,25 +8,28 @@
 using namespace std;
 
 Goomba::Goomba(const string& texture_file, double x_pos, double y_pos, const double &sprite_width, const double &sprite_height, const int &map_width, const int &map_height, const int &tile_width, const int &tile_height, const double &map_scale) {
-  alive = true;
-  x = sprite_width;
-  y = sprite_height;
-  m_texture.loadFromFile(texture_file);
-  m_vertices.setPrimitiveType(sf::Quads);
-  m_vertices.resize(sprite_width * sprite_height * 4);
+    alive = true;
+    x = sprite_width;
+    y = sprite_height;
+    m_texture.loadFromFile(texture_file);
+    m_vertices.setPrimitiveType(sf::Quads);
+    m_vertices.resize(sprite_width * sprite_height * 4);
 
-  m_vertices[0].position = sf::Vector2f(x_pos, y_pos);
-  m_vertices[1].position = sf::Vector2f(x_pos + sprite_width, y_pos);
-  m_vertices[2].position = sf::Vector2f(x_pos + sprite_width, y_pos + sprite_height);
-  m_vertices[3].position = sf::Vector2f(x_pos, y_pos + sprite_height);
+    m_vertices[0].position = sf::Vector2f(x_pos, y_pos);
+    m_vertices[1].position = sf::Vector2f(x_pos + sprite_width, y_pos);
+    m_vertices[2].position = sf::Vector2f(x_pos + sprite_width, y_pos + sprite_height);
+    m_vertices[3].position = sf::Vector2f(x_pos, y_pos + sprite_height);
 
-  m_vertices[0].texCoords = sf::Vector2f(0, 0);
-  m_vertices[1].texCoords = sf::Vector2f(sprite_width, 0);
-  m_vertices[2].texCoords = sf::Vector2f(sprite_width, sprite_height);
-  m_vertices[3].texCoords = sf::Vector2f(0, sprite_height);
+    m_vertices[0].texCoords = sf::Vector2f(0, 0);
+    m_vertices[1].texCoords = sf::Vector2f(sprite_width, 0);
+    m_vertices[2].texCoords = sf::Vector2f(sprite_width, sprite_height);
+    m_vertices[3].texCoords = sf::Vector2f(0, sprite_height);
 
-  right = true;
-  x_vel = 0.1;
+    right = true;
+    x_vel = 0.1;
+
+    yahoo_ee_buffer.loadFromFile("Assets/sounds/yahoo-ee.wav");
+    yahoo_ee.setBuffer(yahoo_ee_buffer);
 }
 
 void Goomba::update(const double &delta_time, const int &map_rows, const int &map_columns, Player * player, vector<vector<int>> &level) {
@@ -45,22 +48,33 @@ void Goomba::update(const double &delta_time, const int &map_rows, const int &ma
     enemy_up = m_vertices[0].position.y;
     enemy_down = m_vertices[2].position.y;
 
-    if ((double)player_left / enemy_right < 1.01 && (double)player_right / enemy_left > 0.99 && (double)player_down / enemy_up > 0.99 && (double)player_up / enemy_down < 1.01) { 
-      if ((double)player_left / enemy_right > 0.99 && ((player_up > enemy_up && player_up < enemy_down) || (player_down > enemy_up && player_down < enemy_down) || (y_midpoint > enemy_up && y_midpoint < enemy_down))) {
+    if ((double)player_left - enemy_right < 10 && (double)player_right - enemy_left > -10 && (double)player_down - enemy_up > -10 && (double)player_up - enemy_down < 10) { 
+      if ((double)player_left - enemy_right > -10 && ((player_up > enemy_up && player_up < enemy_down) || (player_down > enemy_up && player_down < enemy_down) || (y_midpoint > enemy_up && y_midpoint < enemy_down))) {
+	    player->m_vertices[0].position = sf::Vector2f(0, 0);
+	    player->m_vertices[1].position = sf::Vector2f(player->sprite_width, 0);
+        player->m_vertices[2].position = sf::Vector2f(player->sprite_width, player->sprite_height);
+        player->m_vertices[3].position = sf::Vector2f(0, player->sprite_height);
+	    if (player->get_big()) {
+            player->set_big(false);
+        } else {
+            player->set_alive(false);
+	    }
+        player->ow.play();
+      } else if ((double)player_right - enemy_left < 10 && ((player_up > enemy_up && player_up < enemy_down) || (player_down > enemy_up && player_down < enemy_down) || (y_midpoint > enemy_up && y_midpoint < enemy_down))) {
 	player->m_vertices[0].position = sf::Vector2f(0, 0);
 	player->m_vertices[1].position = sf::Vector2f(player->sprite_width, 0);
         player->m_vertices[2].position = sf::Vector2f(player->sprite_width, player->sprite_height);
         player->m_vertices[3].position = sf::Vector2f(0, player->sprite_height);
-	player->lives -= 1;
-      } else if ((double)player_right / enemy_left < 1.01 && ((player_up > enemy_up && player_up < enemy_down) || (player_down > enemy_up && player_down < enemy_down) || (y_midpoint > enemy_up && y_midpoint < enemy_down))) {
-	player->m_vertices[0].position = sf::Vector2f(0, 0);
-	player->m_vertices[1].position = sf::Vector2f(player->sprite_width, 0);
-        player->m_vertices[2].position = sf::Vector2f(player->sprite_width, player->sprite_height);
-        player->m_vertices[3].position = sf::Vector2f(0, player->sprite_height);
-	player->lives -= 1;
+	    if (player->get_big()) {
+            player->set_big(false);
+        } else {
+            player->set_alive(false);
+	    }
+	    player->ow.play();
 	}
       if (((double)player_down / enemy_up > 0.99 && player_up < enemy_up) && ((player_left > enemy_left && player_left < enemy_right) || (player_right > enemy_left && player_right < enemy_right))) {
-        alive = false;
+        yahoo_ee.play();
+	alive = false;
         m_vertices[0].position = sf::Vector2f(0, 0);
 	m_vertices[1].position = sf::Vector2f(0, 0);
 	m_vertices[2].position = sf::Vector2f(0, 0);
