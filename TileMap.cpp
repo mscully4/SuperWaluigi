@@ -6,7 +6,7 @@
 using namespace std;
 
 TileMap::TileMap(const string& sprite_sheet, vector<vector<int>>& level, const int tile_width, const int tile_height) {
-        vector<vector<int>> key = {{0, 66}, {0, 0}, {33, 0}, {0, 33}, {66, 0}, {33,33}, {164, 0}, {196, 0}, {100, 0}, {132, 0}};
+    vector<vector<int>> key = {{-1, -1}, {0, 0}, {67, 0}, {0, 68}, {134, 0}, {67, 67}, {332, 0}, {395, 0}, {200, 0}, {268, 0}, {0, 68}, {0, 68}, {0, 68}};
 	m_texture.loadFromFile(sprite_sheet);
 	m_vertices.setPrimitiveType(sf::Quads);
 	m_vertices.resize(level.size() * level[0].size() * 4);

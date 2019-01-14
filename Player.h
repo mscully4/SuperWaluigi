@@ -15,8 +15,11 @@ class Player : public Entity {
 	double y_vel;
     bool alive = true;
     bool big = false;
+    bool complete = false;
+    int coins = 0;
+    vector<vector<int>> key;
 public:
-	Player(const std::string textureFile, double x_pos, double y_pos, double image_width, double image_height);
+	Player(const std::string textureFile, double x_pos, double y_pos);
 	double sprite_width;
 	double sprite_height;
 	void update(double delta_time, const int map_width, const int map_height, const int tile_width, const int tile_height, const int map_scale, vector<vector<int>> &level, vector<PowerUp>& PowerUps);
@@ -24,6 +27,8 @@ public:
     void set_alive(bool status);
     bool get_big();
     void set_big(bool status);
+    bool get_complete();
+    int get_coins();
     unsigned int m_obs_size[2];
 	double m_half_size[2];
 	double m_center_pos[2];
@@ -50,4 +55,10 @@ public:
     
     sf::SoundBuffer break_mystery_buffer;
 	sf::Sound break_mystery;
+
+    sf::SoundBuffer grow_buffer;
+    sf::Sound grow;
+
+    sf::SoundBuffer coin_buffer;
+    sf::Sound coin;
 };

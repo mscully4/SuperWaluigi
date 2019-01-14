@@ -48,8 +48,8 @@ void Goomba::update(const double &delta_time, const int &map_rows, const int &ma
     enemy_up = m_vertices[0].position.y;
     enemy_down = m_vertices[2].position.y;
 
-    if ((double)player_left - enemy_right < 10 && (double)player_right - enemy_left > -10 && (double)player_down - enemy_up > -10 && (double)player_up - enemy_down < 10) { 
-      if ((double)player_left - enemy_right > -10 && ((player_up > enemy_up && player_up < enemy_down) || (player_down > enemy_up && player_down < enemy_down) || (y_midpoint > enemy_up && y_midpoint < enemy_down))) {
+    if ((double)player_left - enemy_right < 3 && (double)player_right - enemy_left > -3 && (double)player_down - enemy_up > -3 && (double)player_up - enemy_down < 3) { 
+      if ((double)player_left - enemy_right > -3 && ((player_up > enemy_up && player_up < enemy_down) || (player_down > enemy_up && player_down < enemy_down) || (y_midpoint > enemy_up && y_midpoint < enemy_down))) {
 	    player->m_vertices[0].position = sf::Vector2f(0, 0);
 	    player->m_vertices[1].position = sf::Vector2f(player->sprite_width, 0);
         player->m_vertices[2].position = sf::Vector2f(player->sprite_width, player->sprite_height);
@@ -60,25 +60,26 @@ void Goomba::update(const double &delta_time, const int &map_rows, const int &ma
             player->set_alive(false);
 	    }
         player->ow.play();
-      } else if ((double)player_right - enemy_left < 10 && ((player_up > enemy_up && player_up < enemy_down) || (player_down > enemy_up && player_down < enemy_down) || (y_midpoint > enemy_up && y_midpoint < enemy_down))) {
-	player->m_vertices[0].position = sf::Vector2f(0, 0);
-	player->m_vertices[1].position = sf::Vector2f(player->sprite_width, 0);
-        player->m_vertices[2].position = sf::Vector2f(player->sprite_width, player->sprite_height);
-        player->m_vertices[3].position = sf::Vector2f(0, player->sprite_height);
-	    if (player->get_big()) {
-            player->set_big(false);
-        } else {
-            player->set_alive(false);
-	    }
-	    player->ow.play();
+      } else if ((double)player_right - enemy_left < 3 && ((player_up > enemy_up && player_up < enemy_down) || (player_down > enemy_up && player_down < enemy_down) || (y_midpoint > enemy_up && y_midpoint < enemy_down))) {
+	        player->m_vertices[0].position = sf::Vector2f(0, 0);
+	        player->m_vertices[1].position = sf::Vector2f(player->sprite_width, 0);
+            player->m_vertices[2].position = sf::Vector2f(player->sprite_width, player->sprite_height);
+            player->m_vertices[3].position = sf::Vector2f(0, player->sprite_height);
+	        if (player->get_big()) {
+                player->set_big(false);
+            } else {
+                player->set_alive(false);
+	        }
+	        player->ow.play();
 	}
-      if (((double)player_down / enemy_up > 0.99 && player_up < enemy_up) && ((player_left > enemy_left && player_left < enemy_right) || (player_right > enemy_left && player_right < enemy_right))) {
-        yahoo_ee.play();
-	alive = false;
-        m_vertices[0].position = sf::Vector2f(0, 0);
-	m_vertices[1].position = sf::Vector2f(0, 0);
-	m_vertices[2].position = sf::Vector2f(0, 0);
-	m_vertices[3].position = sf::Vector2f(0, 0);
+
+        if (((double)player_down - enemy_up > -3 && player_up < enemy_up) && ((player_left > enemy_left && player_left < enemy_right) || (player_right > enemy_left && player_right < enemy_right))) {
+            yahoo_ee.play();
+	        alive = false;
+            m_vertices[0].position = sf::Vector2f(0, 0);
+	        m_vertices[1].position = sf::Vector2f(0, 0);
+	        m_vertices[2].position = sf::Vector2f(0, 0);
+	        m_vertices[3].position = sf::Vector2f(0, 0);
       }
     }
     if (alive) {

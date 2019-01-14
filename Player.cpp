@@ -3,28 +3,30 @@
 #include <SFML/Audio/SoundBuffer.hpp>
 #include <iostream>
 #include <vector>
+#include <cstdlib>
 #include "Entity.h"
 #include "Player.h"
 
 using namespace std; 
 
-Player::Player(const std::string textureFile, double x_pos, double y_pos, double image_width, double image_height)
+Player::Player(const std::string textureFile, double x_pos, double y_pos)
  {
-    sprite_width = image_width;
-	sprite_height = image_height;
+    key = {{0, 0, 58, 106}, {62, 0, 74, 129}};
+    sprite_width = key[0][2];
+	sprite_height = key[0][3];
     
     m_texture.loadFromFile(textureFile);
 	m_vertices.setPrimitiveType(sf::Quads);
-	m_vertices.resize(image_width * image_height * 4);
+	m_vertices.resize(sprite_width * sprite_height * 4);
 
 	m_vertices[0].position = sf::Vector2f(x_pos, y_pos);
-	m_vertices[1].position = sf::Vector2f(x_pos + image_width, y_pos);
-	m_vertices[2].position = sf::Vector2f(x_pos + image_width, y_pos + image_height);
-	m_vertices[3].position = sf::Vector2f(x_pos, y_pos + image_height);
+	m_vertices[1].position = sf::Vector2f(x_pos + sprite_width, y_pos);
+	m_vertices[2].position = sf::Vector2f(x_pos + sprite_width, y_pos + sprite_height);
+	m_vertices[3].position = sf::Vector2f(x_pos, y_pos + sprite_height);
 
 	m_vertices[0].texCoords = sf::Vector2f(0, 0);
-	m_vertices[1].texCoords = sf::Vector2f(image_width, 0);
-	m_vertices[2].texCoords = sf::Vector2f(image_width, image_height);
+	m_vertices[1].texCoords = sf::Vector2f(sprite_width, 0);
+	m_vertices[2].texCoords = sf::Vector2f(sprite_width, sprite_height);
 	m_vertices[3].texCoords = sf::Vector2f(0, sprite_height);
 
 	m_obs_size[0] = m_vertices[1].position.x - m_vertices[0].position.x;
@@ -34,7 +36,6 @@ Player::Player(const std::string textureFile, double x_pos, double y_pos, double
 	m_center_pos[0] = m_vertices[0].position.x + m_half_size[0];
 	m_center_pos[1] = m_vertices[0].position.y + m_half_size[1];
 
-	//std::cout << m_obs_size[0] << ", " << m_obs_size[1] << std::endl;
     wah_buffer.loadFromFile("Assets/sounds/wah.wav");
     wah.setBuffer(wah_buffer);
 	wah.setVolume(20.f);
@@ -53,9 +54,17 @@ Player::Player(const std::string textureFile, double x_pos, double y_pos, double
 
     break_mystery_buffer.loadFromFile("Assets/sounds/break_mystery.wav");	
     break_mystery.setBuffer(break_mystery_buffer);
+
+    grow_buffer.loadFromFile("Assets/sounds/grow.wav");
+    grow.setBuffer(grow_buffer);
+
+    coin_buffer.loadFromFile("Assets/sounds/Coin.wav");
+    coin.setBuffer(coin_buffer);
+
     x_vel = 0.0f;
 	y_vel = 0.0f;
 
+    srand(time(NULL));
 }
 
 bool Player::get_alive() {
@@ -72,6 +81,14 @@ bool Player::get_big() {
 
 void Player::set_big(bool status) {
     this->big = status;
+}
+
+bool Player::get_complete() {
+    return this->complete;
+}
+
+int Player::get_coins() {
+    return this->coins;
 }
 
 void Player::update(double delta_time, const int map_rows, const int map_columns, const int tile_width, const int tile_height, const int map_scale, vector<vector<int>> &level, vector<PowerUp>& power_ups) {
@@ -91,7 +108,16 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
     const int maxHeight = ground - ((map_scale*tile_height) * 4.5);
     const int minHeight = ground - ((map_scale*tile_height) * 2);
     const double speedScale = 0.75;
-           
+    static bool right = true;
+
+    if (big) {
+        this->sprite_width = key[1][2];
+        this->sprite_height = key[1][3];
+    } else {
+        this->sprite_width = key[0][2];
+        this->sprite_height = key[0][3];
+    }
+    
     //map position of the top left corner of the player
     int top_left_column = ((m_vertices[0].position.y - (speedScale * delta_time))/(map_scale*tile_width));
     int top_left_row =  (m_vertices[0].position.x)/(map_scale*tile_width);
@@ -108,21 +134,36 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
     int bottom_right_column = ((m_vertices[2].position.y - (speedScale * delta_time)) / (map_scale * tile_width));
     int bottom_right_row = (m_vertices[2].position.x) / (map_scale * tile_width);
 
-    
+    m_center_pos[0] = m_vertices[0].position.x + m_half_size[0];
+    m_center_pos[1] = m_vertices[0].position.y + m_half_size[1];
+        
+
+    if (key_left) {
+	    x_vel = -1 * speedScale;
+	    //make the sprite face left      
+        m_vertices[0].texCoords = sf::Vector2f(key[big][0] + sprite_width, key[big][1]);
+        m_vertices[1].texCoords = sf::Vector2f(key[big][0], key[big][1]);
+        m_vertices[2].texCoords = sf::Vector2f(key[big][0], key[big][1] + sprite_height);
+        m_vertices[3].texCoords = sf::Vector2f(key[big][0] + sprite_width, key[big][1] + sprite_height);
+        right = false;
+    }
+
+     if (key_right) {
+	    x_vel = 1 * speedScale;
+	    //make the sprite face right
+        m_vertices[0].texCoords = sf::Vector2f(key[big][0], key[big][1]);
+        m_vertices[1].texCoords = sf::Vector2f(key[big][0] + sprite_width, key[big][1]);
+        m_vertices[2].texCoords = sf::Vector2f(key[big][0] + sprite_width, key[big][1] + sprite_height);
+        m_vertices[3].texCoords = sf::Vector2f(key[big][0], key[big][1] + sprite_height);
+        right = true;
+    }
+
     //the sprite is on the descent of a jump
     if (isJumping && !key_up) {
         isFalling = true;
     }
     
-    if (key_left) {
-	x_vel = -1 * speedScale;
-	//make the sprite face left      
-	m_vertices[0].texCoords = sf::Vector2f(sprite_width, 0);
-	m_vertices[1].texCoords = sf::Vector2f(0, 0);
-	m_vertices[2].texCoords = sf::Vector2f(0, sprite_height);
-	m_vertices[3].texCoords = sf::Vector2f(sprite_width, sprite_height);
-    }
-    
+       
     //jumps can only be initiated when the player is on the ground    
     if (key_up && !isFalling && !isDescending && height <= minHeight) {
 	beginJump = true;
@@ -157,19 +198,10 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
         if(height <= minHeight) {
        	    y_vel = 1 * speedScale;
 	    isDescending = true;
-	}
+	    }
     }
 	
-    if (key_right) {
-	x_vel = 1 * speedScale;
-	//make the sprite face right
-	m_vertices[0].texCoords = sf::Vector2f(0, 0);
-	m_vertices[1].texCoords = sf::Vector2f(sprite_width, 0);
-	m_vertices[2].texCoords = sf::Vector2f(sprite_width, sprite_height);
-	m_vertices[3].texCoords = sf::Vector2f(0, sprite_height);
-    }
-
-    //if no keys are pressed, do nothing
+       //if no keys are pressed, do nothing
     if (!key_left && !key_right) {
 	x_vel = 0;
     }
@@ -180,7 +212,7 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
 	if (x_vel < 0) {
 	    //if the tile directly to the left of the bottom left point, upper left point or the midpoint between the two isn't air
 	    if (level[m_vertices[3].position.y/(map_scale*tile_width)][(m_vertices[3].position.x + (x_vel * delta_time))/(map_scale*tile_width)] != 0 ||
-	 level[(m_vertices[0].position.y + m_vertices[2].position.y)/(4*tile_width)][(m_vertices[3].position.x + (x_vel * delta_time))/(2*tile_width)] != 0 || 
+	 level[(m_vertices[0].position.y + m_vertices[2].position.y)/(2*map_scale*tile_width)][(m_vertices[3].position.x + (x_vel * delta_time))/(map_scale*tile_width)] != 0 || 
 	 level[m_vertices[0].position.y/(map_scale*tile_width)][(m_vertices[3].position.x + (x_vel * delta_time))/(map_scale*tile_width)] != 0) {
                 x_vel = 0;
 	    }
@@ -188,12 +220,13 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
 	//moving right
 	else if (x_vel > 0) {
 	    //if the tile to the right of the bottom right point, upper right point or the midpoint between the two isn't air
-	    if(level[m_vertices[2].position.y/(2*tile_width)][(m_vertices[2].position.x + (x_vel * delta_time))/(2*tile_width)] != 0 ||
-	    level[m_vertices[0].position.y/(2*tile_width)][(m_vertices[2].position.x + (x_vel * delta_time))/(2*tile_width)] != 0 ||
-	    level[(m_vertices[0].position.y + m_vertices[2].position.y)/(4*tile_width)][(m_vertices[2].position.x + (x_vel * delta_time))/(2*tile_width)] != 0 ) {
+	    if ((level[bottom_right_column][bottom_right_row ] != 0 && m_vertices[2].position.x / (tile_width * map_scale) < map_rows - 5) ||
+	    level[top_right_column][top_right_row] != 0 ||
+	    level[(m_vertices[0].position.y + m_vertices[2].position.y)/(2*map_scale*tile_width)][(m_vertices[2].position.x + (x_vel * delta_time))/(map_scale*tile_width)] != 0 ) {
                 x_vel = 0;
 	    }
 	}
+
 	//Not sure what this does	
 	/*else if (level[m_vertices[3].position.y/(map_scale*tile_width)][m_vertices[3].position.x/(map_scale*tile_width)] != 0 || 
 	level[m_vertices[2].position.y/(map_scale*tile_width)][m_vertices[2].position.x/(map_scale*tile_width)] != 0){
@@ -201,8 +234,8 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
 	}*/
 
 	//if the player is within the bounds of the map, move according to the x velocity
-	if (m_vertices[0].position.x + (x_vel * delta_time) >= 0 &&
-	m_vertices[2].position.x + (x_vel * delta_time) <= map_rows * tile_width * map_scale) {
+	if (m_vertices[0].position.x + (x_vel * delta_time) >= 0)
+	/* && m_vertices[2].position.x + (x_vel * delta_time) <= map_rows * tile_width * map_scale)*/ {
 		for (int i = 0; i < 4; ++i) {
 			m_vertices[i].position.x += x_vel * delta_time;
 		}
@@ -212,8 +245,8 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
 		//if the player is moving down
 		if (y_vel > 0) {
 			//if the tile to the bottom left, bottom right and beneath the midpoint between the two is air
-			if (level[((m_vertices[3].position.y + (y_vel * delta_time))/(map_scale*tile_width))][(m_vertices[0].position.x + (x_vel * delta_time))/(2*tile_width)] == 0 &&
-					level[((m_vertices[3].position.y + (y_vel * delta_time))/(map_scale*tile_width))][(m_vertices[1].position.x + (x_vel * delta_time))/(2*tile_width)] == 0 &&
+			if (level[((m_vertices[3].position.y + (y_vel * delta_time))/(map_scale*tile_width))][(m_vertices[0].position.x + (x_vel * delta_time))/(map_scale*tile_width)] == 0 &&
+					level[((m_vertices[3].position.y + (y_vel * delta_time))/(map_scale*tile_width))][(m_vertices[1].position.x + (x_vel * delta_time))/(map_scale*tile_width)] == 0 &&
 					level[((m_vertices[3].position.y + (y_vel * delta_time))/(map_scale*tile_width))][(m_vertices[0].position.x + m_vertices[1].position.x)/(2*(map_scale*tile_width))] == 0) {
 				//then move the player down
 				for (int i = 0; i < 4; ++i) {
@@ -277,11 +310,47 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
 				minHeightReached = false;
 				isDescending = false;
 			}
+            //if the top left corner of the player hits a mystery coin block
+            if (level[top_left_column][top_left_row] == 3) {
+				this->coins += 1;
+                //randomly determine whether to turn the mystery block into a broken block
+                if ((double)rand() / RAND_MAX > .8) {
+                    //replace the block with a broken mystery block
+                    level[top_left_column][top_left_row] = 5;				
+                    break_mystery.play();
+                } else {
+                    coin.play();
+                }
+				//the player should also stop moving upwards
+                y_vel = 0;
+				isFalling = false;
+				beginJump = false;
+				minHeightReached = false;
+				isDescending = false;
+			}
+            //if the top right corner of the player hits a mystery coin block
+            if (level[top_right_column][top_right_row] == 3) {
+				this->coins += 1;
+                //randomly determine whether to turn the mystery block into a broken block
+                if ((double)rand() / RAND_MAX > .8) {
+                    //replace the block with a broken mystery block
+                    level[top_right_column][top_right_row] = 5;				
+				    break_mystery.play();
+                } else {
+                    coin.play();
+                }
+				//the player should also stop moving upwards
+                y_vel = 0;
+				isFalling = false;
+				beginJump = false;
+				minHeightReached = false;
+				isDescending = false;
+			}
+
 
 			//if the top left corner of the player hits a mystery block
-			if (level[top_left_column][top_left_row] == 3){
+			if (level[top_left_column][top_left_row] == 10){
                 //make a powerup appear
-               // PowerUp power_up("Assets/images/Goomba.png", top_left_column, top_right_column, 32, 32, 32, 32, "Chork");
                 power_ups.push_back(PowerUp("Assets/images/Mushroom.png", top_left_row, top_left_column, 64, 64, 64, 64, "Chork"));
 				//then replace the block with a broken mystery block
                 level[top_left_column][top_left_row] = 5;				
@@ -294,7 +363,7 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
 				isDescending = false;
 			}
 			//if the top right corner of the player hits a mystery block
-			else if (level[top_right_column][top_right_row] == 3) {
+			else if (level[top_right_column][top_right_row] == 10) {
                 power_ups.push_back(PowerUp("Assets/images/Mushroom.png", top_right_row, top_right_column, 64, 64, 64, 64, "Chork"));
 				//then replace the block with a broken mystery block
 				level[top_right_column][top_right_row] = 5;
@@ -311,7 +380,7 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
     //if the player's y_vel == 0
 	else {
         //so long as the tile beneath the bottom left and bottom right corners of the player are air
-        if (level[bottom_left_column + 1][bottom_left_row] == 0 && level[bottom_right_column + 1][bottom_right_row] == 0) {
+        if (level[bottom_left_column + 1][bottom_left_row] == 0 && level[bottom_right_column + 1][bottom_right_row] == 0 && level[bottom_right_column + 1][m_center_pos[0] / (map_scale * tile_width)] == 0) {
             isFalling = true;
             isDescending = true;
             y_vel = 1 * speedScale;
@@ -322,7 +391,7 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
         }
 	}
 
-        //if the player hits a power up
+        //if the player collects a power up
         for (int i=0; i < power_ups.size(); ++i) {
             int power_up_row = power_ups[i].get_x_tile();
             int power_up_column = power_ups[i].get_y_tile();
@@ -331,36 +400,50 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
             (top_right_row == power_up_row && top_right_column + 2 == power_up_column) || 
             (bottom_left_row == power_up_row && bottom_left_column + 1 == power_up_column) || 
             (bottom_right_row == power_up_row && bottom_right_column + 1 == power_up_column)) {
-                if (power_ups[i].get_active()) {
+                if (power_ups[i].get_active() && big == false) {
                     this->big = true;
+                    grow.play();
                 }
                 power_ups[i].set_active(false);
             }
         }
         
         //this triggers the ending animation	
-	    if (bottom_right_row >= (float)map_rows - .03) {
+	    if (bottom_right_row >= (float)map_rows - .1) {
 	        winner.play();
-	        for (int i = 0; i < 4; ++i) {
-	            m_vertices[i] = m_vertices[0];
-	            m_vertices[i].position.x += .03;
-	        }
-	            x_vel = 0;
-	            y_vel = 0;
-	            cont = false;
-	    }
+	        x_vel = 0;
+	        y_vel = 0;
+	        cont = false;
+            	    }
 	
-        m_center_pos[0] = m_vertices[0].position.x + m_half_size[0];
-        m_center_pos[1] = m_vertices[0].position.y + m_half_size[1];
-        
-    //if the player falls off the map
-        if(m_vertices[3].position.y + 2 * y_vel * delta_time >= map_columns * 2 * tile_width){
+            //if the player falls off the map
+        if(m_vertices[3].position.y + 2 * y_vel * delta_time >= map_columns * map_scale * tile_width){
 	        ow.play();
 	        this->alive = false;
             m_vertices[0].position = sf::Vector2f(0, 0);
             m_vertices[1].position = sf::Vector2f(sprite_width, 0);
             m_vertices[2].position = sf::Vector2f(sprite_width, sprite_height);
             m_vertices[3].position = sf::Vector2f(0, sprite_height);
+        }
+    //ending sequence
+    } else {
+        //if the player is on the ground
+        if ((int)m_vertices[2].position.y == (map_columns - 2) * tile_height) { 
+            //move him into he enters the castle
+            if (m_vertices[2].position.x < (map_rows * tile_width) + 350) {
+                for (int i=0; i<4; ++i) {
+                    m_vertices[i].position.x = m_vertices[i].position.x + 0.25;
+                }
+            //then kill the program
+            } else {
+                this->complete = true;
+            }
+        //if the player is in the air
+        } else {
+            //move him to the ground before doing anything
+            for (int i=0; i<4; ++i) {
+                m_vertices[i].position.y +=1;
+            }
         }
     }
 }

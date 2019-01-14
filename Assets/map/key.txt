@@ -1,17 +1,15 @@
 Number // Block Type // Pixel Location // Size
 
 0 - Sky
-1 - Ground	[0, 0]  (32x32)
-2 - Breakable	[33, 0]	(32x32)
-3 - Coin	[0, 33]	(32x32)
-4 - Brick	[66, 0]	(32x32)
-5 - BrokenCoin	[33, 33]	(32x32)
-6 - Pipe Bottom Left [166, 0]	(64x64)
-7 - Pipe Bottom Right [198, 0] 
-8 - Pipe Top Left [100, 0]	(64x64)
-9 - Pipe Top Right [132, 0]
-
-9 - Flag pole	[229, 0]	(64x288)
-8 - Castle	[0, 66]	(192x192)
-10 - Goomba	[66, 33]	(32x32)
-
+1 - Ground		[0, 0]  (32x32)
+2 - Breakable		[33, 0]	(32x32)
+3 - Mystery (Coin)	[0, 33]	(32x32)
+4 - Brick		[66, 0]	(32x32)
+5 - BrokenCoin		[33, 33] (32x32)
+6 - Pipe Bottom Left 	[166, 0]	(64x64)
+7 - Pipe Bottom Right 	[198, 0] 
+8 - Pipe Top Left 	[100, 0]	(64x64)
+9 - Pipe Top Right 	[132, 0]
+10 - Mystery (Mushroom) [0, 33]
+11 - Mystery (Fireball) [0, 33]
+12 - Mystery (Star)	[0, 33]
