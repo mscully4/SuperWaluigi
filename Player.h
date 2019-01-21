@@ -6,27 +6,39 @@
 #include <vector>
 #include "Entity.h"
 #include "PowerUp.h"
+#include "Chork.h"
 
 using namespace std;
 
-class PowerUp;
 class Player : public Entity {
 	double x_vel;
 	double y_vel;
+    bool right = true;
     bool alive = true;
     bool big = false;
     bool complete = false;
+    int fire = 0;
+    int invincible = 0;
+    int oscillator = 0;
+    sf::Clock oscillator_timer;
     int coins = 0;
     vector<vector<int>> key;
+    vector<vector<int>> oscillating;
 public:
-	Player(const std::string textureFile, double x_pos, double y_pos);
+	Player(const std::string textureFile, double x_pos, double y_pos, Chork& chork);
 	double sprite_width;
 	double sprite_height;
-	void update(double delta_time, const int map_width, const int map_height, const int tile_width, const int tile_height, const int map_scale, vector<vector<int>> &level, vector<PowerUp>& PowerUps);
+	int chork_height, chork_width;
+    vector<vector<int>> chork_constants = {{30, -47, 15}, {45, -40, 10}};
+    void update(double delta_time, const int map_width, const int map_height, const int tile_width, const int tile_height, const int map_scale, vector<vector<int>> &level, vector<PowerUp>& PowerUps, Chork& chork);
 	bool get_alive();
     void set_alive(bool status);
     bool get_big();
     void set_big(bool status);
+    int get_fire();
+    void change_fire(int);
+    int get_invincible();
+    void change_invincible(int);
     bool get_complete();
     int get_coins();
     unsigned int m_obs_size[2];
@@ -35,7 +47,7 @@ public:
 	
 	//Update variables
 	bool facing_right;
-	bool key_left, key_up, key_down, key_right;
+	bool key_left, key_up, key_down, key_right, key_c;
 
 	//soundtrack
 	sf::SoundBuffer wah_buffer;

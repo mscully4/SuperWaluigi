@@ -17,7 +17,8 @@ void load_map(const string& path, vector<vector<int>> &map) {
             for (int z=0; z < line.length(); ++z) {
                 if (isdigit(line[z]) && isdigit(line[z + 1])) {
                     number = (line[z] - '0') * 10 + (line[z + 1] - '0');
-	                array.push_back(number);
+                    array.push_back(number);
+                    ++z;
                 } else if (isdigit(line[z])) {
                     number = line[z] - '0';
                     array.push_back(number);

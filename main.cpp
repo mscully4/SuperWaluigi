@@ -14,6 +14,7 @@
 #include "Enemies.h"
 #include "Ending.h"
 #include "PowerUp.h"
+#include "Chork.h"
 
 using namespace std;
 
@@ -43,11 +44,14 @@ int main() {
     Ending ending("Assets/images/SpriteSheet2.png", 4, 4, map_width, map_height);
 
     vector<PowerUp> power_ups;
-    Player player("Assets/images/WaluigiSpriteSheet.png", 0, 0);
+    
+    Chork chork("Assets/images/Vomit.png", 500, 675, 70, 44);
+    Player player("Assets/images/WaluigiSpriteSheet.png", 0, 0, chork);
 
-/*	Goomba goomba1("Assets/images/Goomba.png", 400, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
-	Goomba goomba2("Assets/images/Goomba.png", 1000, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
-	Goomba goomba3("Assets/images/Goomba.png", 2180, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
+    vector<Goomba> goombas;
+//	goombas.push_back(Goomba("Assets/images/Goomba.png", 400, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
+//	goombas.push_back(Goomba("Assets/images/Goomba.png", 1000, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
+/*	Goomba goomba3("Assets/images/Goomba.png", 2180, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
 	Goomba goomba4("Assets/images/Goomba.png", 2750, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
 	Goomba goomba5("Assets/images/Goomba.png", 3700, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
 	Goomba goomba6("Assets/images/Goomba.png", 5800, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale);
@@ -71,7 +75,16 @@ int main() {
 	sf::Text text_seconds("400", consola_font, 20);
     sf::Text text_coins("00", consola_font, 20);
 
-	while (window.isOpen()) {
+    Entity coin_icon;
+    coin_icon.m_texture.loadFromFile("Assets/images/Coin.png");
+    coin_icon.m_vertices.setPrimitiveType(sf::Quads);
+    coin_icon.m_vertices.resize(32 * 32 * 4);
+    coin_icon.m_vertices[0].texCoords = sf::Vector2f(0, 0);
+    coin_icon.m_vertices[1].texCoords = sf::Vector2f(32, 0);
+    coin_icon.m_vertices[2].texCoords = sf::Vector2f(32, 32);
+    coin_icon.m_vertices[3].texCoords = sf::Vector2f(0, 32);
+    	
+    while (window.isOpen()) {
 		sf::Event event;
 		while (window.pollEvent(event)) {
 			if (event.type == sf::Event::Closed)
@@ -87,33 +100,26 @@ int main() {
 
 	    view.setCenter(sf::Vector2f(player.m_center_pos[0], player.m_center_pos[1]));
 
-		player.update(fps, map_rows, map_columns, tile_width, tile_height, map_scale, level, power_ups);
+		player.update(fps, map_rows, map_columns, tile_width, tile_height, map_scale, level, power_ups, chork);
         
         coins = player.get_coins();
         if (coins > 10) {
-            text_coins.setString(to_string(coins));
+            text_coins.setString("X " + to_string(coins));
         } else {
-            text_coins.setString("0" + to_string(coins));
+            text_coins.setString("X 0" + to_string(coins));
         }
-
-/*		goomba1.update(fps, map_rows, map_columns, &player, level);
-		goomba2.update(fps, map_rows, map_columns, &player, level);
-		goomba3.update(fps, map_rows, map_columns, &player, level);
+        
+   /*     for (int i = 0; i < goombas.size(); ++i) {
+		    goombas[i].update(fps, map_rows, map_columns, &player, level);
+		}
+/*		goomba3.update(fps, map_rows, map_columns, &player, level);
 		goomba4.update(fps, map_rows, map_columns, &player, level);
 		goomba5.update(fps, map_rows, map_columns, &player, level);
 		goomba6.update(fps, map_rows, map_columns, &player, level);
 		goomba7.update(fps, map_rows, map_columns, &player, level);
-//		goomba8.update(fps, map_rows, map_columns, &player, level);
+		goomba8.update(fps, map_rows, map_columns, &player, level);
 */
-		if (player.m_center_pos[0] > 0 + (window_width/2) && player.m_center_pos[0] < (map_rows * tile_width * map_scale) - (window_width/2)) {
-			view.setCenter(sf::Vector2f(player.m_center_pos[0], (map_height + (map_height - window_height)) / 2));
-	        text_waluigi.setPosition(player.m_center_pos[0] - (.4 * window_width), 310);
-            text_coins.setPosition(player.m_center_pos[0] - (.1 * window_width), 310);
-            text_world.setPosition(player.m_center_pos[0] + (.1 * window_width), 310);
-			text_level.setPosition(player.m_center_pos[0] + 20 + (.1 * window_width), 340);
-	        text_time.setPosition(player.m_center_pos[0] + (.35 * window_width), 310);
-            text_seconds.setPosition(player.m_center_pos[0] + (.35 * window_width), 340);
-		} else if (player.m_center_pos[0] < 0 + (window_width / 2)) {
+	 if (player.m_center_pos[0] < 0 + (window_width / 2)) {
 			view.setCenter(sf::Vector2f((window_width / 2), (map_height + (map_height - window_height)) / 2));
 	        text_waluigi.setPosition(120, 310);
             text_coins.setPosition(480, 310);
@@ -121,7 +127,11 @@ int main() {
 			text_level.setPosition(740, 340);
 			text_time.setPosition(1020, 310);
 			text_seconds.setPosition(1020, 340);
-		} else if (player.m_center_pos[0] > (map_rows * tile_width * map_scale) - (window_width / 2)) {
+	        coin_icon.m_vertices[0].position = sf::Vector2f(420, 306);
+            coin_icon.m_vertices[1].position = sf::Vector2f(452, 306);
+            coin_icon.m_vertices[2].position = sf::Vector2f(452, 338);
+            coin_icon.m_vertices[3].position = sf::Vector2f(420, 338);
+	} else {
 			view.setCenter(sf::Vector2f(player.m_center_pos[0], (map_height + (map_height - window_height)) / 2));
 	        text_waluigi.setPosition(player.m_center_pos[0] - (.4 * window_width), 310);
 	        text_coins.setPosition(player.m_center_pos[0] - (.1 * window_width), 310);
@@ -129,6 +139,11 @@ int main() {
 			text_level.setPosition(player.m_center_pos[0] + 20 + (.1 * window_width), 340);
 	        text_time.setPosition(player.m_center_pos[0] + (.35 * window_width), 310);
             text_seconds.setPosition(player.m_center_pos[0] + (.35 * window_width), 340);
+            coin_icon.m_vertices[0].position = sf::Vector2f(player.m_center_pos[0] - (window_width * .15), 306);
+            coin_icon.m_vertices[1].position = sf::Vector2f(player.m_center_pos[0] + 32 - (window_width * .15), 306);
+            coin_icon.m_vertices[2].position = sf::Vector2f(player.m_center_pos[0] + 32 - (window_width * .15), 338);
+            coin_icon.m_vertices[3].position = sf::Vector2f(player.m_center_pos[0] - (window_width * .15), 338);
+
 	}
 
 		window.setView(view);
@@ -136,21 +151,26 @@ int main() {
 		window.draw(map);
 		window.draw(ending);
 		window.draw(player);
-/*		window.draw(goomba1);
-		window.draw(goomba2);
+        window.draw(chork);
+       /* 
+       for (int i = 0; i < goombas.size(); ++i) {
+		    window.draw(goombas[i]);
+        }
 		window.draw(goomba3);
 		window.draw(goomba4);
 		window.draw(goomba5);
 		window.draw(goomba6);
 		window.draw(goomba7);
-		window.draw(goomba8);*/
+		window.draw(goomba8);
+         */   
         for (int i=0; i < power_ups.size(); ++i) {
             if (power_ups[i].get_active()) {
                 window.draw(power_ups[i]);
-            }
+             }
         }
 
 		window.draw(text_waluigi);
+        window.draw(coin_icon);
         window.draw(text_coins);
 		window.draw(text_world);
 		window.draw(text_level);
