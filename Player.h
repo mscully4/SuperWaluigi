@@ -15,7 +15,7 @@ class Player : public Entity {
 	double y_vel;
     bool right = true;
     bool alive = true;
-    bool big = false;
+    int big = 0;
     bool complete = false;
     int fire = 0;
     int invincible = 0;
@@ -29,12 +29,14 @@ public:
 	double sprite_width;
 	double sprite_height;
 	int chork_height, chork_width;
+    bool is_chorking = false;
+    sf::Clock chork_timer;	
     vector<vector<int>> chork_constants = {{30, -47, 15}, {45, -40, 10}};
     void update(double delta_time, const int map_width, const int map_height, const int tile_width, const int tile_height, const int map_scale, vector<vector<int>> &level, vector<PowerUp>& PowerUps, Chork& chork);
 	bool get_alive();
     void set_alive(bool status);
     bool get_big();
-    void set_big(bool status);
+    void set_big(int status);
     int get_fire();
     void change_fire(int);
     int get_invincible();
@@ -44,9 +46,8 @@ public:
     unsigned int m_obs_size[2];
 	double m_half_size[2];
 	double m_center_pos[2];
-	
 	//Update variables
-	bool facing_right;
+	bool facing_right = true;
 	bool key_left, key_up, key_down, key_right, key_c;
 
 	//soundtrack

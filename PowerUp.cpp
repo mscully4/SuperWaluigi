@@ -6,7 +6,7 @@
 #include "PowerUp.h"
 using namespace std;
 
-PowerUp::PowerUp(const string& texture_file, double x_tile, double y_tile, const double sprite_width, const double sprite_height, const int tile_width, const int tile_height, string type) {
+PowerUp::PowerUp(const string& texture_file, int x_tile, int y_tile, const double sprite_width, const double sprite_height, const int tile_width, const int tile_height, string type) {
     this->x_tile = x_tile;
     this->y_tile = y_tile;
     this->type = type;  

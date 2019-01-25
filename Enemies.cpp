@@ -30,9 +30,9 @@ Goomba::Goomba(const string& texture_file, double x_pos, double y_pos, const dou
 
     yahoo_ee_buffer.loadFromFile("Assets/sounds/yahoo-ee.wav");
     yahoo_ee.setBuffer(yahoo_ee_buffer);
-}
+ }
 
-void Goomba::update(const double &delta_time, const int &map_rows, const int &map_columns, Player * player, vector<vector<int>> &level) {
+void Goomba::update(const double &delta_time, const int &map_rows, const int &map_columns, Player * player, Chork * chork, vector<vector<int>> &level) {
   if (alive) {
     int y_midpoint = player->m_vertices[0].position.y + (player->sprite_height / 2);
     int x_midpoint = player->m_vertices[0].position.x + (player->sprite_width / 2);
@@ -47,9 +47,29 @@ void Goomba::update(const double &delta_time, const int &map_rows, const int &ma
     enemy_right = m_vertices[2].position.x;
     enemy_up = m_vertices[0].position.y;
     enemy_down = m_vertices[2].position.y;
+    chork_left = chork->m_vertices[0].position.x;
+    chork_right = chork->m_vertices[2].position.x;
+    chork_up = chork->m_vertices[0].position.y;
+    chork_down = chork->m_vertices[2].position.y;
+
+    if (chork_left - enemy_right < 3 && chork_right - enemy_left > -3 && chork_down - enemy_up > -3 && chork_up - enemy_down < 3) { 
+        if (player->facing_right && (chork_right - enemy_left > 3) && ((chork_up > enemy_up && chork_up < enemy_down) || (chork_down > enemy_up && chork_down < enemy_down))) {
+            alive = false;
+            m_vertices[0].position = sf::Vector2f(0, 0);
+            m_vertices[1].position = sf::Vector2f(0, 0);
+            m_vertices[2].position = sf::Vector2f(0, 0);
+            m_vertices[3].position = sf::Vector2f(0, 0);
+        } else if (!player->facing_right && (chork_left - enemy_right < 3) && ((chork_up > enemy_up && chork_up < enemy_down) || (chork_down > enemy_up && chork_down < enemy_down))) {
+            alive = false;
+            m_vertices[0].position = sf::Vector2f(0, 0);
+            m_vertices[1].position = sf::Vector2f(0, 0);
+            m_vertices[2].position = sf::Vector2f(0, 0);
+            m_vertices[3].position = sf::Vector2f(0, 0);
+        }
+    }
 
     //if there is a collision
-    if ((double)player_left - enemy_right < 3 && (double)player_right - enemy_left > -3 && (double)player_down - enemy_up > -3 && (double)player_up - enemy_down < 3) { 
+    if (player_left - enemy_right < 3 && player_right - enemy_left > -3 && player_down - enemy_up > -3 && player_up - enemy_down < 3) { 
         //if the player collides with either of the sides of the enemy
         if (((double)player_left - enemy_right > -3 || (double)player_right - enemy_left < 3) && ((player_up > enemy_up && player_up < enemy_down) || (player_down > enemy_up && player_down < enemy_down) || (y_midpoint > enemy_up && y_midpoint < enemy_down))) {
 	        if (player->get_invincible()) {
@@ -65,7 +85,7 @@ void Goomba::update(const double &delta_time, const int &map_rows, const int &ma
                 player->m_vertices[2].position = sf::Vector2f(player->sprite_width, player->sprite_height);
                 player->m_vertices[3].position = sf::Vector2f(0, player->sprite_height);
 	            if (player->get_big()) {
-                    player->set_big(false);
+                    player->set_big(0);
                 } else {
                     player->set_alive(false);
 	            }

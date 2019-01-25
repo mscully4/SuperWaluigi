@@ -20,7 +20,7 @@ class PowerUp : public Entity {
     sf::Sound power_up_appear;
 
   public:
-    PowerUp(const std::string& texture_file, double x_pos, double y_pos, const double sprite_width, const double sprite_height, const int tile_width, const int tile_height, string type);
+    PowerUp(const std::string& texture_file, int x_pos, int y_pos, const double sprite_width, const double sprite_height, const int tile_width, const int tile_height, string type);
     void set_active(bool status);
     double get_x_tile();
     double get_y_tile();
