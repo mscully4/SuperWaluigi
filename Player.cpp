@@ -253,7 +253,9 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
 	if (y_vel != 0) {
         //if the player is moving down
 		if (y_vel > 0) {
-            if (level[(m_vertices[3].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[3].position.x / (map_scale * tile_width)] == 0 && level[(m_vertices[2].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[2].position.x / (map_scale * tile_width)] == 0 && level[(m_vertices[2].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][(m_vertices[2].position.x / (2 * map_scale * tile_width))] == 0) {
+            if (level[(m_vertices[3].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[3].position.x / (map_scale * tile_width)] == 0 
+            && level[(m_vertices[2].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[2].position.x / (map_scale * tile_width)] == 0 
+            && level[(m_vertices[2].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][(m_vertices[2].position.x + m_vertices[3].position.x) / (2 * map_scale * tile_width)] == 0) {
 			//if the tile to the bottom left, bottom right and beneath the midpoint between the two is air
                 //then move the player down
 				for (int i = 0; i < 4; ++i) {
@@ -587,7 +589,7 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
         }
         
         //if the player falls off the map
-        if(m_vertices[3].position.y + 2 * y_vel * delta_time >= map_columns * map_scale * tile_width){
+        if(m_vertices[3].position.y + (map_scale * y_vel * delta_time) >= map_columns * map_scale * tile_width){
 	        ow.play();
 	        this->alive = false;
             m_vertices[0].position = sf::Vector2f(0, 0);
@@ -612,7 +614,8 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
             } else if (key_c && !is_chorking && can_chork) {
                 is_chorking = true;
                 chork_timer.restart();
-            } else if (!key_c && is_chorking) {
+                chork.chorking.play();
+            } else if (!key_c && is_chorking && chork_timer.getElapsedTime().asSeconds() > 3) {
                 is_chorking = false;
                 can_chork = false;
             } else if (is_chorking) {

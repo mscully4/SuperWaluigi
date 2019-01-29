@@ -14,11 +14,11 @@ class Chork : public Entity {
         bool active;
         int x, y;
         int sprite_width, sprite_height;
-        //sound effects
-        sf::SoundBuffer chorking_buffer;
-        sf::Sound chorking;
-    public:
+   public:
         Chork(const string& texture_file, double x_pos, double y_pos, const double& sprite_width, const double& sprite_height);
         int get_sprite_width();
         int get_sprite_height();
-};
+        //sound effects
+        sf::SoundBuffer chorking_buffer;
+        sf::Sound chorking;
+ };

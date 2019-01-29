@@ -52,14 +52,14 @@ void Goomba::update(const double &delta_time, const int &map_rows, const int &ma
     chork_up = chork->m_vertices[0].position.y;
     chork_down = chork->m_vertices[2].position.y;
 
-    if (chork_left - enemy_right < 3 && chork_right - enemy_left > -3 && chork_down - enemy_up > -3 && chork_up - enemy_down < 3) { 
-        if (player->facing_right && (chork_right - enemy_left > 3) && ((chork_up > enemy_up && chork_up < enemy_down) || (chork_down > enemy_up && chork_down < enemy_down))) {
+    if (chork_left - enemy_right < 3 && chork_right - enemy_left > -3 && player_down - enemy_up > -3 && chork_up - enemy_down < 3) { 
+        if (player->facing_right && (chork_right - enemy_left > 3)) { // && ((player_up > enemy_up && player_up < enemy_down) || (player_down > enemy_up && player_down < enemy_down))) {
             alive = false;
             m_vertices[0].position = sf::Vector2f(0, 0);
             m_vertices[1].position = sf::Vector2f(0, 0);
             m_vertices[2].position = sf::Vector2f(0, 0);
             m_vertices[3].position = sf::Vector2f(0, 0);
-        } else if (!player->facing_right && (chork_left - enemy_right < 3) && ((chork_up > enemy_up && chork_up < enemy_down) || (chork_down > enemy_up && chork_down < enemy_down))) {
+        } else if (!player->facing_right && (chork_left - enemy_right < 3)) { // && ((player_up > enemy_up && player_up < enemy_down) || (player_down > enemy_up && player_down < enemy_down))) {
             alive = false;
             m_vertices[0].position = sf::Vector2f(0, 0);
             m_vertices[1].position = sf::Vector2f(0, 0);
@@ -79,7 +79,6 @@ void Goomba::update(const double &delta_time, const int &map_rows, const int &ma
 	            m_vertices[2].position = sf::Vector2f(0, 0);
 	            m_vertices[3].position = sf::Vector2f(0, 0);
             } else {
-                cout << "NO" << endl;
                 player->m_vertices[0].position = sf::Vector2f(0, 0);
 	            player->m_vertices[1].position = sf::Vector2f(player->sprite_width, 0);
                 player->m_vertices[2].position = sf::Vector2f(player->sprite_width, player->sprite_height);
@@ -100,6 +99,7 @@ void Goomba::update(const double &delta_time, const int &map_rows, const int &ma
 	        m_vertices[1].position = sf::Vector2f(0, 0);
 	        m_vertices[2].position = sf::Vector2f(0, 0);
 	        m_vertices[3].position = sf::Vector2f(0, 0);
+            yahoo_ee.play();
       }
     }
     if (alive) {

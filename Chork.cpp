@@ -27,6 +27,9 @@ Chork::Chork(const string& texture_file, double x_pos, double y_pos, const doubl
     m_vertices[1].texCoords = sf::Vector2f(sprite_width, 0);
     m_vertices[2].texCoords = sf::Vector2f(sprite_width, sprite_height);
     m_vertices[3].texCoords = sf::Vector2f(0, sprite_height);
+
+    chorking_buffer.loadFromFile("Assets/sounds/chork.wav");
+    chorking.setBuffer(chorking_buffer);
 };
 
 int Chork::get_sprite_width() {

@@ -46,17 +46,17 @@ int main() {
     vector<PowerUp> power_ups;
     
     Chork chork("Assets/images/Vomit.png", 500, 675, 70, 44);
-    Player player("Assets/images/WaluigiSpriteSheet.png", 0, 0, chork);
+    Player player("Assets/images/WaluigiSpriteSheet.png", 100, 100, chork);
 
     vector<Goomba> goombas;
 	goombas.push_back(Goomba("Assets/images/Goomba.png", 400, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
-    goombas.push_back(Goomba("Assets/images/Goomba.png", 1000, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
-    goombas.push_back(Goomba("Assets/images/Goomba.png", 2180, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
-	goombas.push_back(Goomba("Assets/images/Goomba.png", 2750, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
-	goombas.push_back(Goomba("Assets/images/Goomba.png", 3700, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
-	goombas.push_back(Goomba("Assets/images/Goomba.png", 5800, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
-	goombas.push_back(Goomba("Assets/images/Goomba.png", 8700, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
-	goombas.push_back(Goomba("Assets/images/Goomba.png", 9500, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
+//    goombas.push_back(Goomba("Assets/images/Goomba.png", 1000, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
+//    goombas.push_back(Goomba("Assets/images/Goomba.png", 2180, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
+//	goombas.push_back(Goomba("Assets/images/Goomba.png", 2750, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
+//	goombas.push_back(Goomba("Assets/images/Goomba.png", 3700, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
+//	goombas.push_back(Goomba("Assets/images/Goomba.png", 5800, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
+//	goombas.push_back(Goomba("Assets/images/Goomba.png", 8700, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
+//	goombas.push_back(Goomba("Assets/images/Goomba.png", 9500, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
 
 	sf::SoundBuffer loser_buffer;
 	loser_buffer.loadFromFile("Assets/sounds/loser.wav");
@@ -168,7 +168,7 @@ int main() {
 		window.display();
 		
         if(!player.get_alive() || time_elapsed > time_left) {
-			loser.play();
+            loser.play();
 			this_thread::sleep_for(chrono::seconds(2));
 			window.close();
 		} else if (player.get_complete()) {
