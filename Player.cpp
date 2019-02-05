@@ -279,14 +279,12 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
 			level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[0].position.x / (map_scale * tile_width)] == 0 &&
             level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * map_scale * tile_width)] == 0 &&
 			level[(m_vertices[1].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[1].position.x / (map_scale * tile_width)] == 0) {
-		
-		//move the player
+		        //move the player
 				for (int i = 0; i < 4; ++i) {
-					m_vertices[i].position.y += y_vel * delta_time;
+					m_vertices[i].position.y += (y_vel * delta_time);
 				}
-			}
-			//if not, then don't let the player jump	
-			else {
+			} else {
+                //dont let the player jumo
 				ground = m_vertices[2].position.y;
 				y_vel = 0;
 				isFalling = false;
@@ -294,6 +292,7 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
 				minHeightReached = false;
 				isDescending = false;
 			}
+            
 			//if the top left corner of the player hits a breakable box,
 			if (level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[0].position.x / (map_scale * tile_width)] == 2) {
 				//then replace the block with air
@@ -517,9 +516,9 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
     //if the player's y_vel == 0
 	else {
         //so long as the tile beneath the bottom left and bottom right corners of the player are air
-        if (level[(m_vertices[3].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[3].position.x / (map_scale * tile_width)] == 0 && 
-        level[(m_vertices[2].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[2].position.x / (map_scale * tile_width)] == 0 &&
-        level[(m_vertices[2].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][(m_vertices[2].position.x + m_vertices[3].position.x) / (2 * map_scale * tile_width)] == 0) {
+        if (level[(m_vertices[2].position.y + (y_vel * speedScale * delta_time)) / (map_scale * tile_width)][m_vertices[3].position.x / (map_scale * tile_width)] == 0 && 
+        level[(m_vertices[2].position.y + (y_vel * speedScale * delta_time)) / (map_scale * tile_width)][m_vertices[2].position.x / (map_scale * tile_width)] == 0 &&
+        level[(m_vertices[2].position.y + (y_vel * speedScale * delta_time)) / (map_scale * tile_width)][(m_vertices[2].position.x + m_vertices[3].position.x) / (2 * map_scale * tile_width)] == 0) {
             isFalling = true;
             isDescending = true;
             y_vel = 1 * speedScale;
@@ -591,6 +590,7 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
         //if the player falls off the map
         if(m_vertices[3].position.y + (map_scale * y_vel * delta_time) >= map_columns * map_scale * tile_width){
 	        ow.play();
+            cout << "boof" << endl;
 	        this->alive = false;
             m_vertices[0].position = sf::Vector2f(0, 0);
             m_vertices[1].position = sf::Vector2f(sprite_width, 0);
@@ -670,6 +670,10 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
         }
     //the game is over and it is time for the ending sequence
     } else {
+        chork.m_vertices[0].position = sf::Vector2f(0, 0);
+        chork.m_vertices[1].position = sf::Vector2f(0, 0);
+        chork.m_vertices[2].position = sf::Vector2f(0, 0);
+        chork.m_vertices[3].position = sf::Vector2f(0, 0);
         //if the player is on the ground
         if ((int)m_vertices[2].position.y == (map_columns - 2) * tile_height) { 
             //move him into he enters the castle

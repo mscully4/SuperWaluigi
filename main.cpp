@@ -26,7 +26,8 @@ int main() {
 	const double map_scale = 1;
 	vector<vector<int>> level;
 	load_map("Assets/map/1-1.txt", level);
-	const int map_rows = level[0].size();
+	cout << level.size() << " " << level[0].size() << endl;
+    const int map_rows = level[0].size();
 	const int map_columns = level.size();
 	double map_width = map_rows * tile_width * map_scale;
 	double map_height = map_columns * tile_height * map_scale;
@@ -50,13 +51,13 @@ int main() {
 
     vector<Goomba> goombas;
 	goombas.push_back(Goomba("Assets/images/Goomba.png", 400, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
-//    goombas.push_back(Goomba("Assets/images/Goomba.png", 1000, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
-//    goombas.push_back(Goomba("Assets/images/Goomba.png", 2180, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
-//	goombas.push_back(Goomba("Assets/images/Goomba.png", 2750, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
-//	goombas.push_back(Goomba("Assets/images/Goomba.png", 3700, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
-//	goombas.push_back(Goomba("Assets/images/Goomba.png", 5800, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
-//	goombas.push_back(Goomba("Assets/images/Goomba.png", 8700, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
-//	goombas.push_back(Goomba("Assets/images/Goomba.png", 9500, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
+    goombas.push_back(Goomba("Assets/images/Goomba.png", 1000, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
+    goombas.push_back(Goomba("Assets/images/Goomba.png", 2180, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
+	goombas.push_back(Goomba("Assets/images/Goomba.png", 2750, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
+	goombas.push_back(Goomba("Assets/images/Goomba.png", 3700, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
+	goombas.push_back(Goomba("Assets/images/Goomba.png", 5800, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
+	goombas.push_back(Goomba("Assets/images/Goomba.png", 8700, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
+	goombas.push_back(Goomba("Assets/images/Goomba.png", 9500, 0, 64, 64, map_width, map_height, tile_width, tile_height, map_scale));
 
 	sf::SoundBuffer loser_buffer;
 	loser_buffer.loadFromFile("Assets/sounds/loser.wav");
