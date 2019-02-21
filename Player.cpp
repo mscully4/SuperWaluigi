@@ -253,9 +253,9 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
     if (y_vel != 0) {
         //if the player is moving down
 		if (y_vel > 0) {
-            if (level[(m_vertices[3].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[3].position.x / (map_scale * tile_width)] == 0 
-            && level[(m_vertices[2].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[2].position.x / (map_scale * tile_width)] == 0 
-            && level[(m_vertices[2].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][(m_vertices[2].position.x + m_vertices[3].position.x) / (2 * map_scale * tile_width)] == 0) {
+            if (level[(m_vertices[3].position.y + (y_vel * delta_time)) / tile_width][m_vertices[3].position.x / tile_width] == 0 
+            && level[(m_vertices[2].position.y + (y_vel * delta_time)) / tile_width][m_vertices[2].position.x / tile_width] == 0 
+            && level[(m_vertices[2].position.y + (y_vel * delta_time)) / tile_width][(m_vertices[2].position.x + m_vertices[3].position.x) / (2 * tile_width)] == 0) {
 			//if the tile to the bottom left, bottom right and beneath the midpoint between the two is air
                 //then move the player down
 				for (int i = 0; i < 4; ++i) {
@@ -276,244 +276,127 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
 		} else if (y_vel < 0) {
 			//if the move would keep the player within the bounds of the map, and the tiles above the top left and top right points of the player are air
             if (m_vertices[0].position.y + (y_vel * delta_time) >= 0 && 
-			level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[0].position.x / (map_scale * tile_width)] == 0 &&
-            level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * map_scale * tile_width)] == 0 &&
-			level[(m_vertices[1].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[1].position.x / (map_scale * tile_width)] == 0) {
+			level[(m_vertices[0].position.y + (y_vel * delta_time)) / tile_width][m_vertices[0].position.x / tile_width] == 0 &&
+            level[(m_vertices[0].position.y + (y_vel * delta_time)) / tile_width][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width)] == 0 &&
+			level[(m_vertices[1].position.y + (y_vel * delta_time)) / tile_width][m_vertices[1].position.x / tile_width] == 0) {
 		        //move the player
 				for (int i = 0; i < 4; ++i) {
 					m_vertices[i].position.y += (y_vel * delta_time);
 				}
 			} else {
-                //dont let the player jumo
+                //dont let the player jump
 				ground = m_vertices[2].position.y;
 				y_vel = 0;
 				isFalling = false;
 				beginJump = false;
 				minHeightReached = false;
 				isDescending = false;
-        cout << m_vertices[2].position.y << " " << map_scale << " " << y_vel << " " << delta_time << endl; 
-			}
-            
-			//if the top left corner of the player hits a breakable box,
-			if (level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[0].position.x / (map_scale * tile_width)] == 2) {
-				//then replace the block with air
-				level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[0].position.x / (map_scale * tile_width)] = 0;
-				//the player should also stop moving upward
-                break_block.play();
-				y_vel = 0;
-				isFalling = false;
-				beginJump = false;
-				minHeightReached = false;
-				isDescending = false;
-			}
-			//if the top right corner of the player hits a breakable box,
-			if (level[(m_vertices[1].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[1].position.x / (map_scale * tile_width)] == 2) {
-				//then replace the block with air
-				level[(m_vertices[1].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[1].position.x / (map_scale * tile_width)] = 0;
-                break_block.play();
-				//the player should also stop moving upwards
-				y_vel = 0;
-				isFalling = false;
-				beginJump = false;
-				minHeightReached = false;
-				isDescending = false;
-			}
-          //if the top midpoint of the player hits a breakable box
-            
-            if (level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][(m_vertices[0].position.x + m_vertices[1].position.x) / (2*map_scale * tile_width)] == 2) {
-				//then replace the block with air
-				level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * map_scale * tile_width)] = 0;
-                break_block.play();
-				//the player should also stop moving upwards
-				y_vel = 0;
-				isFalling = false;
-				beginJump = false;
-				minHeightReached = false;
-				isDescending = false;
-			}
-            
-            //if the top left corner of the player hits a mystery coin block
-            if (level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[0].position.x / (map_scale * tile_width)] == 3) {
-				this->coins += 1;
-                //randomly determine whether to turn the mystery block into a broken block
-                if ((double)rand() / RAND_MAX > .8) {
-                    //replace the block with a broken mystery block
-                    level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][(m_vertices[0].position.x + (x_vel * delta_time)) / (map_scale * tile_width)] = 5;				
-                    break_mystery.play();
-                } else {
-                    coin.play();
+			    
+                int top_left = level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[0].position.x / tile_width];
+	            int top_center = level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width)];
+                int top_right = level[((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[1].position.x / tile_width];
+cout << top_left << " " << top_center << " " << top_right << endl;
+                //if the top left corner of the player hits a breakable box,
+                if (top_left == 2) {
+                    //then replace the block with air
+                    level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[0].position.x / tile_width] = 0;
+                    break_block.play();
+                } else if (top_left == 3) {
+                    this->coins += 1;
+                    //randomly determine whether to turn the mystery block into a broken block
+                    if ((double)rand() / RAND_MAX > .8) {
+                        //replace the block with a broken mystery block
+                        level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][(m_vertices[0].position.x + (x_vel * delta_time)) / tile_width] = 5;
+                        break_mystery.play();
+                    } else {
+                        coin.play();
+                    }
+                } else if (top_left == 10) {
+                    //make a powerup appear
+                    power_ups.push_back(PowerUp("Assets/images/Mushroom.png", m_vertices[0].position.x / tile_width, ((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1, 64, 64, 64, 64, "Mushroom"));
+                    //then replace the block with a broken mystery block
+                    level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[0].position.x / tile_width] = 5;				              break_mystery.play();
+                } else if (top_left == 11) {
+                    //make a powerup appear
+                    power_ups.push_back(PowerUp("Assets/images/Chork.png", m_vertices[0].position.x / tile_width, ((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1, 64, 64, 64, 64, "Chork"));
+                    //then replace the block with a broken mystery block
+                    level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[0].position.x / tile_width] = 5;				              break_mystery.play();
+                }  else if (top_left == 12) {
+                    //make a powerup appear
+                    power_ups.push_back(PowerUp("Assets/images/Star.png", m_vertices[0].position.x / tile_width, ((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1, 64, 64, 64, 64, "Star"));
+                    //then replace the block with a broken mystery block
+                    level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[0].position.x / tile_width] = 5;				              break_mystery.play();
                 }
-				//the player should also stop moving upwards
-                y_vel = 0;
-				isFalling = false;
-				beginJump = false;
-				minHeightReached = false;
-				isDescending = false;
-			}
-            //if the top right corner of the player hits a mystery coin block
-            if (level[(m_vertices[1].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[1].position.x / (map_scale * tile_width)] == 3) {
-				this->coins += 1;
-                //randomly determine whether to turn the mystery block into a broken block
-                if ((double)rand() / RAND_MAX > .8) {
-                    //replace the block with a broken mystery block
-                    level[(m_vertices[1].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[1].position.x / (map_scale * tile_width)] = 5;				
-				    break_mystery.play();
-                } else {
-                    coin.play();
-                }
-				//the player should also stop moving upwards
-                y_vel = 0;
-				isFalling = false;
-				beginJump = false;
-				minHeightReached = false;
-				isDescending = false;
-			}
-            //if the top midpoint of the player hits a mystery coin block
-            if (level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * map_scale * tile_width)] == 3) {
-				this->coins += 1;
-                //randomly determine whether to turn the mystery block into a broken block
-                if ((double)rand() / RAND_MAX > .8) {
-                    //replace the block with a broken mystery block
-                    level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * map_scale * tile_width)] = 5;				
-				    break_mystery.play();
-                } else {
-                    coin.play();
-                }
-				//the player should also stop moving upwards
-                y_vel = 0;
-				isFalling = false;
-				beginJump = false;
-				minHeightReached = false;
-				isDescending = false;
-			}
-			//if the top left corner of the player hits a mystery mushroom block
-			if (level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[0].position.x / (map_scale * tile_width)] == 10) {
-                //make a powerup appear
-                power_ups.push_back(PowerUp("Assets/images/Mushroom.png", m_vertices[0].position.x / (map_scale * tile_width), (m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width), 64, 64, 64, 64, "Mushroom"));
-				//then replace the block with a broken mystery block
-                level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[0].position.x / (map_scale * tile_width)] = 5;				
-				//the player should also stop moving upwards
-				break_mystery.play();
-                y_vel = 0;
-				isFalling = false;
-				beginJump = false;
-				minHeightReached = false;
-				isDescending = false;
-			}
-			//if the top right corner of the player hits a mystery mushroom block
-			if (level[(m_vertices[1].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[1].position.x / (map_scale * tile_width)] == 10) {
-                power_ups.push_back(PowerUp("Assets/images/Mushroom.png", m_vertices[1].position.x / (map_scale * tile_width), (m_vertices[1].position.y + (y_vel * delta_time)) / (map_scale * tile_width), 64, 64, 64, 64, "Mushroom"));
-				//then replace the block with a broken mystery block
-				level[(m_vertices[1].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[1].position.x / (map_scale * tile_width)] = 5;
-				//the player should also stop moving upwards
-				break_mystery.play();
-				y_vel = 0;
-				isFalling = false;
-				beginJump = false;
-				minHeightReached = false;
-				isDescending = false;
-			}
-			//if the top midpoint of the player hits a mystery mushroom block
-			if (level[(m_vertices[1].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * map_scale * tile_width)] == 10) {
-                power_ups.push_back(PowerUp("Assets/images/Mushroom.png", (m_vertices[0].position.x + m_vertices[1].position.x) / (2 * map_scale * tile_width), m_vertices[1].position.y / (map_scale * tile_width), 64, 64, 64, 64, "Mushroom"));
-				//then replace the block with a broken mystery block
-				level[m_vertices[1].position.y  / (map_scale * tile_width)][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * map_scale * tile_width)] = 5;
-				//the player should also stop moving upwards
-				break_mystery.play();
-				y_vel = 0;
-				isFalling = false;
-				beginJump = false;
-				minHeightReached = false;
-				isDescending = false;
-			}
-            
-            //if the top left corner of the player hits a mystery chork block
-			if (level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[0].position.x / (map_scale * tile_width)] == 11) {
-                //make a powerup appear
-                power_ups.push_back(PowerUp("Assets/images/Chork.png", m_vertices[0].position.x / (map_scale * tile_width), (m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width), 64, 64, 64, 64, "Chork"));
-				//then replace the block with a broken mystery block
-                level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[0].position.x / (map_scale * tile_width)] = 5;				
-				//the player should also stop moving upwards
-				break_mystery.play();
-                y_vel = 0;
-				isFalling = false;
-				beginJump = false;
-				minHeightReached = false;
-				isDescending = false;
-			}
-			
-            //if the top right corner of the player hits a mystery chork block
-			if (level[(m_vertices[1].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[1].position.x / (map_scale * tile_width)] == 11) {
-                power_ups.push_back(PowerUp("Assets/images/Chork.png", m_vertices[1].position.x / (map_scale * tile_width), (m_vertices[1].position.y + (y_vel * delta_time)) / (map_scale * tile_width), 64, 64, 64, 64, "Chork"));
-				//then replace the block with a broken mystery block
-				level[(m_vertices[1].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[1].position.x / (map_scale * tile_width)] = 5;
-				//the player should also stop moving upwards
-				break_mystery.play();
-				y_vel = 0;
-				isFalling = false;
-				beginJump = false;
-				minHeightReached = false;
-				isDescending = false;
-			}
-            //if the top midpoint of the player hits a mystery chork block
-		    if (level[(m_vertices[1].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * map_scale * tile_width)] == 11) {
-                //make a powerup appear
-                power_ups.push_back(PowerUp("Assets/images/Chork.png", (m_vertices[0].position.x + m_vertices[1].position.x) / (2 * map_scale * tile_width), (m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width), 64, 64, 64, 64, "Chork"));
-				//then replace the block with a broken mystery block
-                level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * map_scale * tile_width)] = 5;				
-				//the player should also stop moving upwards
-				break_mystery.play();
-                y_vel = 0;
-				isFalling = false;
-				beginJump = false;
-				minHeightReached = false;
-				isDescending = false;
-			}
-            
-            //if the top left corner of the player hits a mystery star block
-			if (level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[0].position.x / (map_scale * tile_width)] == 12) {
-                //make a powerup appear
-                power_ups.push_back(PowerUp("Assets/images/Star.png", m_vertices[0].position.x / (map_scale * tile_width), (m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width), 64, 64, 64, 64, "Star"));
-				//then replace the block with a broken mystery block
-                level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[0].position.x / (map_scale * tile_width)] = 5;				
-				//the player should also stop moving upwards
-				break_mystery.play();
-                y_vel = 0;
-				isFalling = false;
-				beginJump = false;
-				minHeightReached = false;
-				isDescending = false;
-			} 
-			//if the top right corner of the player hits a mystery star block
-			if (level[(m_vertices[1].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[1].position.x / (map_scale * tile_width)] == 12) {
-                power_ups.push_back(PowerUp("Assets/images/Star.png", m_vertices[1].position.x / (map_scale * tile_width), (m_vertices[1].position.y + (y_vel * delta_time)) / (map_scale * tile_width), 64, 64, 64, 64, "Star"));
-				//then replace the block with a broken mystery block
-				level[(m_vertices[1].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[1].position.x / (map_scale * tile_width)] = 5;
-				//the player should also stop moving upwards
-				break_mystery.play();
                 
-				y_vel = 0;
-				isFalling = false;
-				beginJump = false;
-				minHeightReached = false;
-				isDescending = false;
-			}
-            //if the top midpoint of the player hits a mystery star block
-			if (level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * map_scale * tile_width)] == 12) {
-                //make a powerup appear
-                power_ups.push_back(PowerUp("Assets/images/Star.png", (m_vertices[0].position.x + m_vertices[1].position.x) / (2 * map_scale * tile_width), (m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width), 64, 64, 64, 64, "Star"));
-				//then replace the block with a broken mystery block
-                level[(m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * map_scale * tile_width)] = 5;				
-				//the player should also stop moving upwards
-				break_mystery.play();
-                y_vel = 0;
-				isFalling = false;
-				beginJump = false;
-				minHeightReached = false;
-				isDescending = false;
-			}
-		}
-	}
+                //if the top right corner of the player hits a breakable box,
+                if (top_right == 2) {
+                    //then replace the block with air
+                    level[((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[1].position.x / tile_width] = 0;
+                    break_block.play();
+                } else if (top_right == 3) {
+                    this->coins += 1;
+                    //randomly determine whether to turn the mystery block into a broken block
+                    if ((double)rand() / RAND_MAX > .8) {
+                        //replace the block with a broken mystery block
+                        level[((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[1].position.x / tile_width] = 5;				
+                        break_mystery.play();
+                    } else {
+                        coin.play();
+                    }
+                } else if (top_right == 10) {
+                    power_ups.push_back(PowerUp("Assets/images/Mushroom.png", m_vertices[1].position.x / tile_width, ((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1, 64, 64, 64, 64, "Mushroom"));
+                    //then replace the block with a broken mystery block
+                    level[((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[1].position.x / tile_width] = 5;
+                    //the player should also stop moving upwards
+                    break_mystery.play();
+                } else if (top_right == 11) {
+                    power_ups.push_back(PowerUp("Assets/images/Chork.png", m_vertices[1].position.x / tile_width, ((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1, 64, 64, 64, 64, "Chork"));
+                    //then replace the block with a broken mystery block
+                    level[((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[1].position.x / tile_width] = 5;
+                    break_mystery.play();
+                } else if (top_right == 12) {
+                    power_ups.push_back(PowerUp("Assets/images/Star.png", m_vertices[1].position.x / tile_width, ((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1, 64, 64, 64, 64, "Star"));
+                    //then replace the block with a broken mystery block
+                    level[((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[1].position.x / tile_width] = 5;
+                    break_mystery.play();
+                }
+            
+                //if the top midpoint of the player hits a breakable box
+                if (top_center == 2) {
+                    //then replace the block with air
+                    level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width)] = 0;
+                    break_block.play();
+                } else if (top_center == 3) {
+                    this->coins += 1;
+                    //randomly determine whether to turn the mystery block into a broken block
+                    if ((double)rand() / RAND_MAX > .8) {
+                        //replace the block with a broken mystery block
+                        level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width)] = 5;				
+                        break_mystery.play();
+                    } else {
+                        coin.play();
+                    }
+                } else if (top_center == 10) {
+                    power_ups.push_back(PowerUp("Assets/images/Mushroom.png", (m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width), ((m_vertices[1].position.y + (y_vel * delta_time)/ tile_width) - 1), 64, 64, 64, 64, "Mushroom"));
+                    //then replace the block with a broken mystery block
+                    level[((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width)] = 5;
+                    break_mystery.play();
+                } else if (top_center == 11) {
+                    //make a powerup appear
+                    power_ups.push_back(PowerUp("Assets/images/Chork.png", (m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width), ((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1, 64, 64, 64, 64, "Chork"));
+                    //then replace the block with a broken mystery block
+                    level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width)] = 5;				
+                    break_mystery.play();
+                } else if (top_center == 12) {
+                    //make a powerup appear
+                    power_ups.push_back(PowerUp("Assets/images/Star.png", (m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width), ((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1, 64, 64, 64, 64, "Star"));
+                    //then replace the block with a broken mystery block
+                    level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width)] = 5;				
+                    break_mystery.play();
+                }
+		    }
+	    }
+    }
     //if the player's y_vel == 0
 	else {
         //so long as the tile beneath the bottom left and bottom right corners of the player are air
@@ -588,9 +471,8 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
             }
         }
         //if the player falls off the map
-        if(m_vertices[2].position.y + (map_scale * y_vel * delta_time) >= map_columns * map_scale * tile_width){
+        if(m_vertices[2].position.y + (map_scale * y_vel * delta_time) >= map_columns * map_scale * tile_width) {
 	        ow.play();
-            cout << "boof " << m_vertices[2].position.y << " " << map_scale * y_vel * delta_time << " "  << map_columns * map_scale * tile_width << endl;
 	        this->alive = false;
             m_vertices[0].position = sf::Vector2f(0, 0);
             m_vertices[1].position = sf::Vector2f(sprite_width, 0);
