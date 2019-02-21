@@ -190,16 +190,16 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
        
     //jumps can only be initiated when the player is on the ground    
     if (key_up && !isFalling && !isDescending && height <= minHeight) {
-	beginJump = true;
-	//if the player hasn't reached the max jump height then keep going up
+	    beginJump = true;
+    //if the player hasn't reached the max jump height then keep going up
 	if (height >= maxHeight) {
 	    y_vel = -1 * speedScale;
 	    isJumping = true;
 	} else {
 	//else go back down
             isFalling = true;
-	}
-    }
+	}}
+    
 	
     //if the player has initiated a jump and hasn't reached the minimum jump height, then keep going up
     if (beginJump && height > minHeight && !isDescending){
@@ -221,7 +221,7 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
 	//this makes sure the player reaches a certain height before they can begin descending
         if(height <= minHeight) {
        	    y_vel = 1 * speedScale;
-	    isDescending = true;
+	        isDescending = true;
 	    }
     }
     //if the player hasn't reached the end
@@ -250,7 +250,7 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
 			m_vertices[i].position.x += x_vel * delta_time;
 		}
 	} 
-	if (y_vel != 0) {
+    if (y_vel != 0) {
         //if the player is moving down
 		if (y_vel > 0) {
             if (level[(m_vertices[3].position.y + (y_vel * delta_time)) / (map_scale * tile_width)][m_vertices[3].position.x / (map_scale * tile_width)] == 0 
@@ -291,6 +291,7 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
 				beginJump = false;
 				minHeightReached = false;
 				isDescending = false;
+        cout << m_vertices[2].position.y << " " << map_scale << " " << y_vel << " " << delta_time << endl; 
 			}
             
 			//if the top left corner of the player hits a breakable box,
@@ -518,7 +519,7 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
         //so long as the tile beneath the bottom left and bottom right corners of the player are air
         if (level[(m_vertices[2].position.y + (y_vel * speedScale * delta_time)) / (map_scale * tile_width)][m_vertices[3].position.x / (map_scale * tile_width)] == 0 && 
         level[(m_vertices[2].position.y + (y_vel * speedScale * delta_time)) / (map_scale * tile_width)][m_vertices[2].position.x / (map_scale * tile_width)] == 0 &&
-        level[(m_vertices[2].position.y + (y_vel * speedScale * delta_time)) / (map_scale * tile_width)][(m_vertices[2].position.x + m_vertices[3].position.x) / (2 * map_scale * tile_width)] == 0) {
+        level[(m_vertices[2].position.y + 1 + (y_vel * speedScale * delta_time)) / (map_scale * tile_width)][(m_vertices[2].position.x + m_vertices[3].position.x) / (2 * map_scale * tile_width)] == 0) {
             isFalling = true;
             isDescending = true;
             y_vel = 1 * speedScale;
@@ -586,11 +587,10 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
                 }
             }
         }
-        
         //if the player falls off the map
-        if(m_vertices[3].position.y + (map_scale * y_vel * delta_time) >= map_columns * map_scale * tile_width){
+        if(m_vertices[2].position.y + (map_scale * y_vel * delta_time) >= map_columns * map_scale * tile_width){
 	        ow.play();
-            cout << "boof" << endl;
+            cout << "boof " << m_vertices[2].position.y << " " << map_scale * y_vel * delta_time << " "  << map_columns * map_scale * tile_width << endl;
 	        this->alive = false;
             m_vertices[0].position = sf::Vector2f(0, 0);
             m_vertices[1].position = sf::Vector2f(sprite_width, 0);

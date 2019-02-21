@@ -100,8 +100,8 @@ int main() {
 		text_seconds.setString(to_string(time_left - time_elapsed));
 
 	    view.setCenter(sf::Vector2f(player.m_center_pos[0], player.m_center_pos[1]));
-
-		player.update(fps, map_rows, map_columns, tile_width, tile_height, map_scale, level, power_ups, chork);
+		
+        player.update(fps, map_rows, map_columns, tile_width, tile_height, map_scale, level, power_ups, chork);
         
         coins = player.get_coins();
         if (coins > 10) {
@@ -169,6 +169,7 @@ int main() {
 		window.display();
 		
         if(!player.get_alive() || time_elapsed > time_left) {
+            cout << player.get_alive() << " " << time_elapsed << " " << time_left << endl;
             loser.play();
 			this_thread::sleep_for(chrono::seconds(2));
 			window.close();
