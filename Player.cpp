@@ -6,16 +6,14 @@
 #include <cstdlib>
 #include "Entity.h"
 #include "Player.h"
+#include <stdio.h>
 
 using namespace std; 
 
-Player::Player(const std::string textureFile, double x_pos, double y_pos, Chork& chork)
+Player::Player(const std::string textureFile, double x_pos, double y_pos, Chork& chork, vector<vector<PowerUp>>& power_ups)
  {
-    key = {{0, 0, 58, 106}, {62, 0, 74, 125}};
-    oscillating  = {{137, 0, 58, 106}, {199, 0, 74, 125}};
-    
-    this->sprite_width = key[0][2];
-    this->sprite_height = key[0][3];
+    this->sprite_width = 58;
+    this->sprite_height = 106;
 
     m_texture.loadFromFile(textureFile);
 	m_vertices.setPrimitiveType(sf::Quads);
@@ -37,6 +35,8 @@ Player::Player(const std::string textureFile, double x_pos, double y_pos, Chork&
 	m_half_size[1] = m_obs_size[1] / 2;
 	m_center_pos[0] = m_vertices[0].position.x + m_half_size[0];
 	m_center_pos[1] = m_vertices[0].position.y + m_half_size[1];
+    
+    this->created_power_ups = power_ups;
 
     wah_buffer.loadFromFile("Assets/sounds/wah.wav");
     wah.setBuffer(wah_buffer);
@@ -62,6 +62,9 @@ Player::Player(const std::string textureFile, double x_pos, double y_pos, Chork&
 
     coin_buffer.loadFromFile("Assets/sounds/Coin.wav");
     coin.setBuffer(coin_buffer);
+
+    yahoo_ee_buffer.loadFromFile("Assets/sounds/yahoo-ee.wav");
+    yahoo_ee.setBuffer(yahoo_ee_buffer);
 
     x_vel = 0.0f;
 	y_vel = 0.0f;
@@ -112,7 +115,7 @@ int Player::get_coins() {
     return this->coins;
 }
 
-void Player::update(double delta_time, const int map_rows, const int map_columns, const int tile_width, const int tile_height, const int map_scale, vector<vector<int>> &level, vector<PowerUp>& power_ups, Chork& chork) {
+void Player::update(double delta_time, const int map_rows, const int map_columns, const int tile_width, const int tile_height, const int map_scale, vector<vector<int>> &level, vector<PowerUp>& active_power_ups, Chork& chork) {
     key_left = sf::Keyboard::isKeyPressed(sf::Keyboard::Left);
     key_up = sf::Keyboard::isKeyPressed(sf::Keyboard::Up);
     key_down = sf::Keyboard::isKeyPressed(sf::Keyboard::Down);
@@ -132,10 +135,11 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
     const double speedScale = 0.75;
 
     double x_pos;
+  
+    this->sprite_width = (big ? 74 : 58);
+    this->sprite_height = (big ? 125 : 106); 
     
-    this->sprite_width = key[big][2];
-    this->sprite_height = key[big][3];
-    
+
     m_vertices[0].position = sf::Vector2f(m_vertices[0].position.x, m_vertices[0].position.y);
 	m_vertices[1].position = sf::Vector2f(m_vertices[0].position.x + sprite_width, m_vertices[0].position.y);
 	m_vertices[2].position = sf::Vector2f(m_vertices[0].position.x + sprite_width, m_vertices[0].position.y + sprite_height);
@@ -143,23 +147,25 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
     
     if (invincible) {
         if (oscillator) {
-            x_pos = oscillating[big][0];
+            x_pos = (big ? 199 : 137);
         } else {
-            x_pos = key[big][0];
+            x_pos = (big ? 62 : 0);
         }
     } else {
-        x_pos = key[big][0];
+        x_pos = (big ? 62 : 0);
     }
  
     m_center_pos[0] = m_vertices[0].position.x + (sprite_width / 2);
     m_center_pos[1] = m_vertices[0].position.y + (sprite_height / 2);
 	
+    //if the left key is pressed, adjust velocity to 1 * speedScale
     if (key_left) {
 	    x_vel = -1 * speedScale;
         facing_right = false;
     }
 
-     if (key_right) {
+    //if the right key is pressed, adjust velocity to 1 * speedScale
+    if (key_right) {
 	    x_vel = 1 * speedScale;
         facing_right = true;
     }
@@ -172,9 +178,9 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
     //make the sprite face right 
     if (facing_right) {
         m_vertices[0].texCoords = sf::Vector2f(x_pos, 0);
-        m_vertices[1].texCoords = sf::Vector2f(x_pos + sprite_width, key[big][1]);
-        m_vertices[2].texCoords = sf::Vector2f(x_pos + sprite_width, key[big][1] + sprite_height);
-        m_vertices[3].texCoords = sf::Vector2f(x_pos, key[big][1] + sprite_height);
+        m_vertices[1].texCoords = sf::Vector2f(x_pos + sprite_width, 0);
+        m_vertices[2].texCoords = sf::Vector2f(x_pos + sprite_width, sprite_height);
+        m_vertices[3].texCoords = sf::Vector2f(x_pos, sprite_height);
     //make the sprite face left
     } else {
         m_vertices[0].texCoords = sf::Vector2f(x_pos + sprite_width, 0);
@@ -195,9 +201,11 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
 	if (height >= maxHeight) {
 	    y_vel = -1 * speedScale;
 	    isJumping = true;
-	} else {
-	//else go back down
-            isFalling = true;
+	} 
+	
+    //else go back down
+    else {
+        isFalling = true;
 	}}
     
 	
@@ -216,14 +224,16 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
         isJumping = false;
     }
 
+
     //if the player is on their way down
     if (isFalling) {
 	//this makes sure the player reaches a certain height before they can begin descending
         if(height <= minHeight) {
-       	    y_vel = 1 * speedScale;
+       	    y_vel = speedScale;
 	        isDescending = true;
 	    }
     }
+
     //if the player hasn't reached the end
     if(cont) {
 	    //moving left
@@ -244,15 +254,19 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
                 x_vel = 0;
 	    }
 	}
+
+
 	//if the player is within the bounds of the map, move according to the x velocity
 	if (m_vertices[0].position.x + (x_vel * delta_time) >= 0) {
 		for (int i = 0; i < 4; ++i) {
 			m_vertices[i].position.x += x_vel * delta_time;
 		}
 	} 
+
     if (y_vel != 0) {
         //if the player is moving down
 		if (y_vel > 0) {
+            //the seg fault is caused by the line underneath, most likely something to do with level
             if (level[(m_vertices[3].position.y + (y_vel * delta_time)) / tile_width][m_vertices[3].position.x / tile_width] == 0 
             && level[(m_vertices[2].position.y + (y_vel * delta_time)) / tile_width][m_vertices[2].position.x / tile_width] == 0 
             && level[(m_vertices[2].position.y + (y_vel * delta_time)) / tile_width][(m_vertices[2].position.x + m_vertices[3].position.x) / (2 * tile_width)] == 0) {
@@ -261,7 +275,19 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
 				for (int i = 0; i < 4; ++i) {
                     m_vertices[i].position.y += y_vel * delta_time;
 				}
-			}
+
+	        //if the player falls off the map
+            if (m_vertices[2].position.y >= (map_columns * tile_width) - 1) {
+                cout << "FELL OFF MAP " << m_vertices[2].position.y << endl;
+	            ow.play();
+	            this->alive = false;
+                m_vertices[0].position = sf::Vector2f(0, 0);
+                m_vertices[1].position = sf::Vector2f(sprite_width, 0);
+                m_vertices[2].position = sf::Vector2f(sprite_width, sprite_height);
+                m_vertices[3].position = sf::Vector2f(0, sprite_height);
+            }
+
+		}
 			//if not,
 			else {
 				//the player must be on the ground
@@ -295,7 +321,8 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
                 int top_left = level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[0].position.x / tile_width];
 	            int top_center = level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width)];
                 int top_right = level[((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[1].position.x / tile_width];
-cout << top_left << " " << top_center << " " << top_right << endl;
+                cout << "Mushrooms: " << created_power_ups[0].size() << " Chorks: " << created_power_ups[1].size() << " Stars: " << created_power_ups[2].size() << endl;
+
                 //if the top left corner of the player hits a breakable box,
                 if (top_left == 2) {
                     //then replace the block with air
@@ -313,86 +340,124 @@ cout << top_left << " " << top_center << " " << top_right << endl;
                     }
                 } else if (top_left == 10) {
                     //make a powerup appear
-                    power_ups.push_back(PowerUp("Assets/images/Mushroom.png", m_vertices[0].position.x / tile_width, ((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1, 64, 64, 64, 64, "Mushroom"));
+                    active_power_ups.push_back(created_power_ups[0].back());
+                    created_power_ups[0].pop_back();
+                    active_power_ups.back().set_coordinates(m_vertices[0].position.x, m_vertices[0].position.y);
+                    active_power_ups.back().set_show(true);
                     //then replace the block with a broken mystery block
-                    level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[0].position.x / tile_width] = 5;				              break_mystery.play();
+                    level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[0].position.x / tile_width] = 5;
+                    break_mystery.play();
                 } else if (top_left == 11) {
                     //make a powerup appear
-                    power_ups.push_back(PowerUp("Assets/images/Chork.png", m_vertices[0].position.x / tile_width, ((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1, 64, 64, 64, 64, "Chork"));
+                    active_power_ups.push_back(created_power_ups[1].back());
+                    created_power_ups[1].pop_back();
+                    active_power_ups.back().set_coordinates(m_vertices[0].position.x, m_vertices[0].position.y);
+                    active_power_ups.back().set_show(true);
                     //then replace the block with a broken mystery block
-                    level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[0].position.x / tile_width] = 5;				              break_mystery.play();
+                    level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[0].position.x / tile_width] = 5;
+                    break_mystery.play();
                 }  else if (top_left == 12) {
                     //make a powerup appear
-                    power_ups.push_back(PowerUp("Assets/images/Star.png", m_vertices[0].position.x / tile_width, ((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1, 64, 64, 64, 64, "Star"));
+                    active_power_ups.push_back(created_power_ups[2].back());
+                    created_power_ups[2].pop_back();
+                    active_power_ups.back().set_coordinates(m_vertices[0].position.x, m_vertices[0].position.y);
+                    active_power_ups.back().set_show(true);
                     //then replace the block with a broken mystery block
-                    level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[0].position.x / tile_width] = 5;				              break_mystery.play();
+                    level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[0].position.x / tile_width] = 5;
+                    break_mystery.play();
                 }
                 
-                //if the top right corner of the player hits a breakable box,
-                if (top_right == 2) {
-                    //then replace the block with air
-                    level[((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[1].position.x / tile_width] = 0;
-                    break_block.play();
-                } else if (top_right == 3) {
-                    this->coins += 1;
-                    //randomly determine whether to turn the mystery block into a broken block
-                    if ((double)rand() / RAND_MAX > .8) {
-                        //replace the block with a broken mystery block
-                        level[((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[1].position.x / tile_width] = 5;				
+                //this is to avoid double dipping
+                if ((int)(m_vertices[0].position.x / tile_width) != (int)(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width)) {
+                    //if the top midpoint of the player hits a breakable box
+                    if (top_center == 2) {
+                        //then replace the block with air
+                        level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width)] = 0;
+                        break_block.play();
+                    } else if (top_center == 3) {
+                        this->coins += 1;
+                        //randomly determine whether to turn the mystery block into a broken block
+                        if ((double)rand() / RAND_MAX > .8) {
+                            //replace the block with a broken mystery block
+                            level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width)] = 5;				
+                            break_mystery.play();
+                        } else {
+                            coin.play();
+                        }
+                    } else if (top_center == 10) {
+                        //make a powerup appear
+                        active_power_ups.push_back(created_power_ups[0].back());
+                        created_power_ups[0].pop_back();
+                        active_power_ups.back().set_coordinates((m_vertices[0].position.x + m_vertices[1].position.x)  / 2, (m_vertices[0].position.y + m_vertices[1].position.y)  / 2);
+                        active_power_ups.back().set_show(true);
+                        //then replace the block with a broken mystery block
+                        level[((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width)] = 5;
                         break_mystery.play();
-                    } else {
-                        coin.play();
-                    }
-                } else if (top_right == 10) {
-                    power_ups.push_back(PowerUp("Assets/images/Mushroom.png", m_vertices[1].position.x / tile_width, ((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1, 64, 64, 64, 64, "Mushroom"));
-                    //then replace the block with a broken mystery block
-                    level[((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[1].position.x / tile_width] = 5;
-                    //the player should also stop moving upwards
-                    break_mystery.play();
-                } else if (top_right == 11) {
-                    power_ups.push_back(PowerUp("Assets/images/Chork.png", m_vertices[1].position.x / tile_width, ((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1, 64, 64, 64, 64, "Chork"));
-                    //then replace the block with a broken mystery block
-                    level[((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[1].position.x / tile_width] = 5;
-                    break_mystery.play();
-                } else if (top_right == 12) {
-                    power_ups.push_back(PowerUp("Assets/images/Star.png", m_vertices[1].position.x / tile_width, ((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1, 64, 64, 64, 64, "Star"));
-                    //then replace the block with a broken mystery block
-                    level[((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[1].position.x / tile_width] = 5;
-                    break_mystery.play();
-                }
-            
-                //if the top midpoint of the player hits a breakable box
-                if (top_center == 2) {
-                    //then replace the block with air
-                    level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width)] = 0;
-                    break_block.play();
-                } else if (top_center == 3) {
-                    this->coins += 1;
-                    //randomly determine whether to turn the mystery block into a broken block
-                    if ((double)rand() / RAND_MAX > .8) {
-                        //replace the block with a broken mystery block
+                    } else if (top_center == 11) {
+                        //make a powerup appear
+                        active_power_ups.push_back(created_power_ups[1].back());
+                        created_power_ups[1].pop_back();
+                        active_power_ups.back().set_coordinates((m_vertices[0].position.x + m_vertices[1].position.x)  / 2, (m_vertices[0].position.y + m_vertices[1].position.y)  / 2);
+                        active_power_ups.back().set_show(true);
+                        //then replace the block with a broken mystery block
                         level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width)] = 5;				
                         break_mystery.play();
-                    } else {
-                        coin.play();
+                    } else if (top_center == 12) {
+                        //make a powerup appear
+                        active_power_ups.push_back(created_power_ups[2].back());
+                        created_power_ups[2].pop_back();
+                        active_power_ups.back().set_coordinates((m_vertices[0].position.x + m_vertices[1].position.x)  / 2, (m_vertices[0].position.y + m_vertices[1].position.y)  / 2);
+                        active_power_ups.back().set_show(true);
+                        //then replace the block with a broken mystery block
+                        level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width)] = 5;				
+                        break_mystery.play();
                     }
-                } else if (top_center == 10) {
-                    power_ups.push_back(PowerUp("Assets/images/Mushroom.png", (m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width), ((m_vertices[1].position.y + (y_vel * delta_time)/ tile_width) - 1), 64, 64, 64, 64, "Mushroom"));
-                    //then replace the block with a broken mystery block
-                    level[((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width)] = 5;
-                    break_mystery.play();
-                } else if (top_center == 11) {
-                    //make a powerup appear
-                    power_ups.push_back(PowerUp("Assets/images/Chork.png", (m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width), ((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1, 64, 64, 64, 64, "Chork"));
-                    //then replace the block with a broken mystery block
-                    level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width)] = 5;				
-                    break_mystery.play();
-                } else if (top_center == 12) {
-                    //make a powerup appear
-                    power_ups.push_back(PowerUp("Assets/images/Star.png", (m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width), ((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1, 64, 64, 64, 64, "Star"));
-                    //then replace the block with a broken mystery block
-                    level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][(m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width)] = 5;				
-                    break_mystery.play();
+                }
+
+                if ((int)(m_vertices[1].position.x / tile_width) != (int)(m_vertices[0].position.x / tile_width) && 
+                (int)(m_vertices[1].position.x / tile_width) != (int)((m_vertices[0].position.x + m_vertices[1].position.x) / (2 * tile_width))) {
+                    //if the top right corner of the player hits a breakable box,
+                    if (top_right == 2) {
+                        //then replace the block with air
+                        level[((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[1].position.x / tile_width] = 0;
+                        break_block.play();
+                    } else if (top_right == 3) {
+                        this->coins += 1;
+                        //randomly determine whether to turn the mystery block into a broken block
+                        if ((double)rand() / RAND_MAX > .8) {
+                            //replace the block with a broken mystery block
+                            level[((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[1].position.x / tile_width] = 5;				
+                            break_mystery.play();
+                        } else {
+                            coin.play();
+                        }
+                    } else if (top_right == 10) {
+                        active_power_ups.push_back(created_power_ups[0].back());
+                        created_power_ups[2].pop_back();
+                        active_power_ups.back().set_coordinates(m_vertices[1].position.x, m_vertices[1].position.y);
+                        active_power_ups.back().set_show(true);
+                            //then replace the block with a broken mystery block
+                        level[((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[1].position.x / tile_width] = 5;
+                        //the player should also stop moving upwards
+                        break_mystery.play();
+                    } else if (top_right == 11) {
+                        active_power_ups.push_back(created_power_ups[1].back());
+                        created_power_ups[1].pop_back();
+                        active_power_ups.back().set_coordinates(m_vertices[1].position.x, m_vertices[1].position.y);
+                        active_power_ups.back().set_show(true);
+                            //then replace the block with a broken mystery block
+                        level[((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[1].position.x / tile_width] = 5;
+                        break_mystery.play();
+                    } else if (top_right == 12) {
+                        active_power_ups.push_back(created_power_ups[2].back());
+                        created_power_ups[2].pop_back();
+                        active_power_ups.back().set_coordinates(m_vertices[1].position.x, m_vertices[1].position.y);
+                        active_power_ups.back().set_show(true);
+                        //then replace the block with a broken mystery block
+                        level[((m_vertices[1].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[1].position.x / tile_width] = 5;
+                        break_mystery.play();
+                    }
+                
                 }
 		    }
 	    }
@@ -413,10 +478,10 @@ cout << top_left << " " << top_center << " " << top_right << endl;
         }
 	}
         //iterate through out list of power-ups
-        for (int i=0; i < power_ups.size(); ++i) {
+        for (int i=0; i < active_power_ups.size(); ++i) {
             //check if the player has collected a power up
-            int power_up_row = power_ups[i].get_x_tile();
-            int power_up_column = power_ups[i].get_y_tile();
+            int power_up_row = active_power_ups[i].get_x() / tile_width;
+            int power_up_column = active_power_ups[i].get_y() / tile_height;
 
             //map position of the top left corner of the player
             int top_left_column = (m_vertices[0].position.y + (y_vel * delta_time)) / (map_scale * tile_width);
@@ -434,50 +499,41 @@ cout << top_left << " " << top_center << " " << top_right << endl;
             int bottom_right_column = (m_vertices[2].position.y + (y_vel * delta_time)) / (map_scale * tile_width);
             int bottom_right_row = (m_vertices[2].position.x + (x_vel * delta_time)) / (map_scale * tile_width);
 
-            
-            if((top_left_row == power_up_row && top_left_column + 2 == power_up_column) ||
-            (top_right_row == power_up_row && top_right_column + 2 == power_up_column) || 
+            printf("PowerUp: %i, %i  TL: %i, %i  TR: %i, %i  BL %i, %i  BR: %i, %i \n", power_up_row, power_up_column, top_left_row, top_left_column, top_right_row, top_right_column, bottom_left_row, bottom_left_column, bottom_right_row, bottom_right_column);
+            if ((top_left_row == power_up_row && (top_left_column + 2) == power_up_column) ||
+            (top_right_row == power_up_row && (top_right_column + 2) == power_up_column) || 
             (bottom_left_row == power_up_row && bottom_left_column == power_up_column) || 
             (bottom_right_row == power_up_row && bottom_right_column  == power_up_column)) {
-                if (power_ups[i].get_type() == "Mushroom" && power_ups[i].get_active()) {
+                if (active_power_ups[i].get_type() == "Mushroom" && active_power_ups[i].get_show()) {
                     if (big == false) {
                         this->set_big(1);
                         grow.play();
                     }
-                } else if (power_ups[i].get_type() == "Chork" && power_ups[i].get_active()) {
-                    power_ups[i].timer.restart();
+                } else if (active_power_ups[i].get_type() == "Chork" && active_power_ups[i].get_show()) {
+                    active_power_ups[i].timer.restart();
                     this->change_fire(1);
-                    power_ups[i].completed = true;
-                } else if (power_ups[i].get_type() == "Star" && power_ups[i].get_active()) {
-                    power_ups[i].timer.restart();
+                    active_power_ups[i].completed = true;
+                } else if (active_power_ups[i].get_type() == "Star" && active_power_ups[i].get_show()) {
+                    active_power_ups[i].timer.restart();
                     this->change_invincible(1);
-                    power_ups[i].completed = true;
+                    active_power_ups[i].completed = true;
                 }
-                power_ups[i].set_active(false);
+               active_power_ups[i].set_show(false);
             }
      //check if active power-ups have expired
-            if (power_ups[i].get_type() == "Star") {
-                double elapsed = power_ups[i].timer.getElapsedTime().asSeconds();
-                if (elapsed > 1000 && power_ups[i].completed) {
+            if (active_power_ups[i].get_type() == "Star") {
+                double elapsed = active_power_ups[i].timer.getElapsedTime().asSeconds();
+                if (elapsed > 20 && active_power_ups[i].completed) {
                     this->change_invincible(-1);
-                    power_ups[i].completed = false;
+                    active_power_ups[i].completed = false;
                 }
-            } else if (power_ups[i].get_type() == "FireFlower") {
-                double elapsed = power_ups[i].timer.getElapsedTime().asSeconds();
-                if (elapsed > 1000 && power_ups[i].completed) {
+            } else if (active_power_ups[i].get_type() == "Chork") {
+                double elapsed = active_power_ups[i].timer.getElapsedTime().asSeconds();
+                if (elapsed > 20 && active_power_ups[i].completed) {
                     this->change_fire(-1);
-                    power_ups[i].completed = false;
+                    active_power_ups[i].completed = false;
                 }
             }
-        }
-        //if the player falls off the map
-        if(m_vertices[2].position.y + (map_scale * y_vel * delta_time) >= map_columns * map_scale * tile_width) {
-	        ow.play();
-	        this->alive = false;
-            m_vertices[0].position = sf::Vector2f(0, 0);
-            m_vertices[1].position = sf::Vector2f(sprite_width, 0);
-            m_vertices[2].position = sf::Vector2f(sprite_width, sprite_height);
-            m_vertices[3].position = sf::Vector2f(0, sprite_height);
         }
 
         //this checks if the player is currently invicible and if so cycles the player sprite
@@ -515,34 +571,32 @@ cout << top_left << " " << top_center << " " << top_right << endl;
                 chork.m_vertices[1].texCoords = sf::Vector2f(chork_width, 0);
                 chork.m_vertices[2].texCoords = sf::Vector2f(chork_width, chork_height);
                 chork.m_vertices[3].texCoords = sf::Vector2f(0, chork_height);
-
-                //move the chork with the player
-                chork.m_vertices[0].position = sf::Vector2f(m_vertices[0].position.x + chork_constants[big][0], m_vertices[0].position.y + chork_constants[big][2]);
-                double chork_x_pos = chork.m_vertices[0].position.x, chork_y_pos = chork.m_vertices[0].position.y;
-                chork.m_vertices[1].position = sf::Vector2f(chork_x_pos + chork_width, chork_y_pos);
-                chork.m_vertices[2].position = sf::Vector2f(chork_x_pos + chork_width, chork_y_pos + chork_height);
-                chork.m_vertices[3].position = sf::Vector2f(chork_x_pos, chork_y_pos + chork_height);
              } else {
                 //update the chork to face left
                 chork.m_vertices[0].texCoords = sf::Vector2f(chork_width, 0);
                 chork.m_vertices[1].texCoords = sf::Vector2f(0, 0);
                 chork.m_vertices[2].texCoords = sf::Vector2f(0, chork_height);
                 chork.m_vertices[3].texCoords = sf::Vector2f(chork_width, chork_height);
-            
-                //move the chork with the player
-                chork.m_vertices[0].position = sf::Vector2f(m_vertices[0].position.x + chork_constants[big][1], m_vertices[0].position.y + chork_constants[big][2]);
-                double chork_x_pos = chork.m_vertices[0].position.x, chork_y_pos = chork.m_vertices[0].position.y;
-                chork.m_vertices[1].position = sf::Vector2f(chork_x_pos + chork_width, chork_y_pos);
-                chork.m_vertices[2].position = sf::Vector2f(chork_x_pos + chork_width, chork_y_pos + chork_height);
-                chork.m_vertices[3].position = sf::Vector2f(chork_x_pos, chork_y_pos + chork_height);
             }
+            if (this->get_big() == 1) {
+                chork.m_vertices[0].position = sf::Vector2f(m_vertices[0].position.x - 40, m_vertices[0].position.y + 10);
+            } else {
+                chork.m_vertices[0].position = sf::Vector2f(m_vertices[0].position.x - 47, m_vertices[0].position.y + 15);
+            }
+            //move the chork with the player
+            double chork_x_pos = chork.m_vertices[0].position.x, chork_y_pos = chork.m_vertices[0].position.y;
+            chork.m_vertices[1].position = sf::Vector2f(chork_x_pos + chork_width, chork_y_pos);
+            chork.m_vertices[2].position = sf::Vector2f(chork_x_pos + chork_width, chork_y_pos + chork_height);
+            chork.m_vertices[3].position = sf::Vector2f(chork_x_pos, chork_y_pos + chork_height);
         } else {
             chork.m_vertices[0].position = sf::Vector2f(0, 0);
             chork.m_vertices[1].position = sf::Vector2f(0, 0);
             chork.m_vertices[2].position = sf::Vector2f(0, 0);
             chork.m_vertices[3].position = sf::Vector2f(0, 0);
         }
-        
+
+
+
         //this checks if the player has won and triggers the ending animation	
 	    if ((m_vertices[2].position.x + (x_vel * delta_time)) / (map_scale * tile_width) >= (float)map_rows - .1) {
 	        winner.play();
@@ -551,7 +605,7 @@ cout << top_left << " " << top_center << " " << top_right << endl;
 	        cont = false;
         }
     //the game is over and it is time for the ending sequence
-    } else {
+   } else {
         chork.m_vertices[0].position = sf::Vector2f(0, 0);
         chork.m_vertices[1].position = sf::Vector2f(0, 0);
         chork.m_vertices[2].position = sf::Vector2f(0, 0);

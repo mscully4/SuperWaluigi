@@ -24,15 +24,16 @@ class Player : public Entity {
     int coins = 0;
     vector<vector<int>> key;
     vector<vector<int>> oscillating;
+    vector<vector<PowerUp>> created_power_ups;
 public:
-	Player(const std::string textureFile, double x_pos, double y_pos, Chork& chork);
+	Player(const std::string textureFile, double x_pos, double y_pos, Chork& chork, vector<vector<PowerUp>>& created_power_ups);
 	double sprite_width;
 	double sprite_height;
 	int chork_height, chork_width;
     bool is_chorking = false;
     sf::Clock chork_timer;	
-    vector<vector<int>> chork_constants = {{30, -47, 15}, {45, -40, 10}};
-    void update(double delta_time, const int map_width, const int map_height, const int tile_width, const int tile_height, const int map_scale, vector<vector<int>> &level, vector<PowerUp>& PowerUps, Chork& chork);
+    vector<vector<int>> chork_constants = {{ 30, -47, 15 }, { 45, -40, 10 }};
+    void update(double delta_time, const int map_width, const int map_height, const int tile_width, const int tile_height, const int map_scale, vector<vector<int>> &level, vector<PowerUp>& active_power_ups, Chork& chork);
 	bool get_alive();
     void set_alive(bool status);
     bool get_big();
@@ -74,4 +75,7 @@ public:
 
     sf::SoundBuffer coin_buffer;
     sf::Sound coin;
+
+    sf::SoundBuffer yahoo_ee_buffer;
+    sf::Sound yahoo_ee;
 };

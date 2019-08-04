@@ -27,15 +27,12 @@ Goomba::Goomba(const string& texture_file, double x_pos, double y_pos, const dou
 
     right = true;
     x_vel = 0.1;
-
-    yahoo_ee_buffer.loadFromFile("Assets/sounds/yahoo-ee.wav");
-    yahoo_ee.setBuffer(yahoo_ee_buffer);
  }
 
 void Goomba::update(const double &delta_time, const int &map_rows, const int &map_columns, Player * player, Chork * chork, vector<vector<int>> &level) {
   if (alive) {
     int y_midpoint = player->m_vertices[0].position.y + (player->sprite_height / 2);
-    int x_midpoint = player->m_vertices[0].position.x + (player->sprite_width / 2);
+    //int x_midpoint = player->m_vertices[0].position.x + (player->sprite_width / 2);
 
     on_ground = (bool)level[(int)(m_vertices[3].position.y / 64)][(int)(m_vertices[3].position.x / 64)];
 
@@ -93,13 +90,12 @@ void Goomba::update(const double &delta_time, const int &map_rows, const int &ma
         }
         //if the player hits the top of the enemy
         if (((double)player_down - enemy_up > -3 && player_up < enemy_up) && ((player_left > enemy_left && player_left < enemy_right) || (player_right > enemy_left && player_right < enemy_right))) {
-            yahoo_ee.play();
+            player->yahoo_ee.play();
 	        alive = false;
             m_vertices[0].position = sf::Vector2f(0, 0);
 	        m_vertices[1].position = sf::Vector2f(0, 0);
 	        m_vertices[2].position = sf::Vector2f(0, 0);
 	        m_vertices[3].position = sf::Vector2f(0, 0);
-            yahoo_ee.play();
       }
     }
     if (alive) {

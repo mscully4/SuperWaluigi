@@ -11,8 +11,8 @@ using namespace std;
 class PowerUp : public Entity {
   private:
     //int top_height;
-    bool active;
-    int x_tile, y_tile;  
+    bool show;
+    int tile_width, tile_height;
     int x, y;
     string type; 
     //sound effects
@@ -20,12 +20,13 @@ class PowerUp : public Entity {
     sf::Sound power_up_appear;
 
   public:
-    PowerUp(const std::string& texture_file, int x_pos, int y_pos, const double sprite_width, const double sprite_height, const int tile_width, const int tile_height, string type);
-    void set_active(bool status);
-    double get_x_tile();
-    double get_y_tile();
-    bool get_active();
+    PowerUp(const std::string& texture_file, const int tile_width, const int tile_height, string type);
+    void set_show(bool status);
+    void set_coordinates(const int&, const int&);
+    bool get_show();
     string get_type();
+    int get_x();
+    int get_y();
     sf::Clock timer;
     bool completed = false;
 };
