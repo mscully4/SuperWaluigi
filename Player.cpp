@@ -29,13 +29,6 @@ Player::Player(const std::string textureFile, double x_pos, double y_pos, Chork&
 	m_vertices[2].texCoords = sf::Vector2f(sprite_width, sprite_height);
 	m_vertices[3].texCoords = sf::Vector2f(0, sprite_height);
 
-	m_obs_size[0] = m_vertices[1].position.x - m_vertices[0].position.x;
-	m_obs_size[1] = m_vertices[3].position.y - m_vertices[0].position.y;
-	m_half_size[0] = m_obs_size[0] / 2;
-	m_half_size[1] = m_obs_size[1] / 2;
-	m_center_pos[0] = m_vertices[0].position.x + m_half_size[0];
-	m_center_pos[1] = m_vertices[0].position.y + m_half_size[1];
-    
     this->created_power_ups = power_ups;
 
     wah_buffer.loadFromFile("Assets/sounds/wah.wav");
@@ -125,7 +118,6 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
     static bool isFalling = true;
     static bool isJumping = false;
     static bool beginJump = true;
-    static bool minHeightReached = true;
     static bool isDescending = true;
     static bool cont = true;
     const int height = m_vertices[2].position.y;
@@ -155,9 +147,6 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
         x_pos = (big ? 62 : 0);
     }
  
-    m_center_pos[0] = m_vertices[0].position.x + (sprite_width / 2);
-    m_center_pos[1] = m_vertices[0].position.y + (sprite_height / 2);
-	
     //if the left key is pressed, adjust velocity to 1 * speedScale
     if (key_left) {
 	    x_vel = -1 * speedScale;
@@ -212,12 +201,12 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
     //if the player has initiated a jump and hasn't reached the minimum jump height, then keep going up
     if (beginJump && height > minHeight && !isDescending){
 	wah.play();
-	y_vel = -1 * speedScale;
-	isJumping = true;
+	    y_vel = -1 * speedScale;
+	    isJumping = true;
     }
 	
     if (key_up) {
-	beginJump = true;
+	    beginJump = true;
     }
 	
     if (!key_up){
@@ -295,7 +284,6 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
 				y_vel = 0;
 				isFalling = false;
 				beginJump = false;
-				minHeightReached = false;
 				isDescending = false;
 			}
         //the player is moving up
@@ -315,7 +303,7 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
 				y_vel = 0;
 				isFalling = false;
 				beginJump = false;
-				minHeightReached = false;
+				
 				isDescending = false;
 			    
                 int top_left = level[((m_vertices[0].position.y + (y_vel * delta_time)) / tile_width) - 1][m_vertices[0].position.x / tile_width];
@@ -433,7 +421,7 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
                         }
                     } else if (top_right == 10) {
                         active_power_ups.push_back(created_power_ups[0].back());
-                        created_power_ups[2].pop_back();
+                        created_power_ups[0].pop_back();
                         active_power_ups.back().set_coordinates(m_vertices[1].position.x, m_vertices[1].position.y);
                         active_power_ups.back().set_show(true);
                             //then replace the block with a broken mystery block
@@ -499,7 +487,7 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
             int bottom_right_column = (m_vertices[2].position.y + (y_vel * delta_time)) / (map_scale * tile_width);
             int bottom_right_row = (m_vertices[2].position.x + (x_vel * delta_time)) / (map_scale * tile_width);
 
-            printf("PowerUp: %i, %i  TL: %i, %i  TR: %i, %i  BL %i, %i  BR: %i, %i \n", power_up_row, power_up_column, top_left_row, top_left_column, top_right_row, top_right_column, bottom_left_row, bottom_left_column, bottom_right_row, bottom_right_column);
+            //printf("PowerUp: %i, %i  TL: %i, %i  TR: %i, %i  BL %i, %i  BR: %i, %i \n", power_up_row, power_up_column, top_left_row, top_left_column, top_right_row, top_right_column, bottom_left_row, bottom_left_column, bottom_right_row, bottom_right_column);
             if ((top_left_row == power_up_row && (top_left_column + 2) == power_up_column) ||
             (top_right_row == power_up_row && (top_right_column + 2) == power_up_column) || 
             (bottom_left_row == power_up_row && bottom_left_column == power_up_column) || 
@@ -527,7 +515,8 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
                     this->change_invincible(-1);
                     active_power_ups[i].completed = false;
                 }
-            } else if (active_power_ups[i].get_type() == "Chork") {
+            }
+            if (active_power_ups[i].get_type() == "Chork") {
                 double elapsed = active_power_ups[i].timer.getElapsedTime().asSeconds();
                 if (elapsed > 20 && active_power_ups[i].completed) {
                     this->change_fire(-1);
@@ -543,21 +532,26 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
                 oscillator_timer.restart();
             }
         }
+
         static bool can_chork = true;
         if (fire) {
             if (!can_chork) {
-                if (chork_timer.getElapsedTime().asSeconds() > 2) {
+                if (chork_timer.getElapsedTime().asSeconds() > 3) {
+                    cout << 1 << endl;
                     can_chork = true;
                 }
             } else if (key_c && !is_chorking && can_chork) {
+                cout << 2 << endl;
                 is_chorking = true;
                 chork_timer.restart();
                 chork.chorking.play();
             } else if (!key_c && is_chorking && chork_timer.getElapsedTime().asSeconds() > 3) {
+                cout << 3 << endl;
                 is_chorking = false;
                 can_chork = false;
             } else if (is_chorking) {
-                if (chork_timer.getElapsedTime().asSeconds() > 5) {
+                if (chork_timer.getElapsedTime().asSeconds() > 4) {
+                    cout << 4 << endl;
                     is_chorking = false;
                     can_chork = false;
                     chork_timer.restart();
@@ -578,10 +572,11 @@ void Player::update(double delta_time, const int map_rows, const int map_columns
                 chork.m_vertices[2].texCoords = sf::Vector2f(0, chork_height);
                 chork.m_vertices[3].texCoords = sf::Vector2f(chork_width, chork_height);
             }
+
             if (this->get_big() == 1) {
-                chork.m_vertices[0].position = sf::Vector2f(m_vertices[0].position.x - 40, m_vertices[0].position.y + 10);
+                chork.m_vertices[0].position = sf::Vector2f(m_vertices[0].position.x + (facing_right ? 42 : -40), m_vertices[0].position.y + 10);
             } else {
-                chork.m_vertices[0].position = sf::Vector2f(m_vertices[0].position.x - 47, m_vertices[0].position.y + 15);
+                chork.m_vertices[0].position = sf::Vector2f(m_vertices[0].position.x + (facing_right ? 33 : -47), m_vertices[0].position.y + 15);
             }
             //move the chork with the player
             double chork_x_pos = chork.m_vertices[0].position.x, chork_y_pos = chork.m_vertices[0].position.y;

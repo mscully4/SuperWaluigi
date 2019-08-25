@@ -111,9 +111,13 @@ int main() {
             fps = 10;
         }
 
+        double player_center_pos[2] = {
+            (player.m_vertices[0].position.x + player.m_vertices[1].position.x) / 2,
+            (player.m_vertices[0].position.y + player.m_vertices[3].position.y) / 2,
+        };
 		time_elapsed = timer.getElapsedTime().asSeconds();
 		text_seconds.setString(to_string(time_left - time_elapsed));
-	    view.setCenter(sf::Vector2f(player.m_center_pos[0], player.m_center_pos[1]));
+	    view.setCenter(sf::Vector2f(player_center_pos[0], player_center_pos[1]));
         
         player.update(fps, map_rows, map_columns, tile_width, tile_height, map_scale, level, active_power_ups, chork);
         
@@ -127,7 +131,7 @@ int main() {
 		    goombas[i].update(fps, map_rows, map_columns, &player, &chork, level);
 		}
 	 
-        if (player.m_center_pos[0] < 0 + (window_width / 2)) {
+        if (player_center_pos[0] < 0 + (window_width / 2)) {
 			view.setCenter(sf::Vector2f((window_width / 2), (map_height + (map_height - window_height)) / 2));
 	        text_waluigi.setPosition(120, 310);
             text_coins.setPosition(480, 310);
@@ -140,17 +144,17 @@ int main() {
             coin_icon.m_vertices[2].position = sf::Vector2f(452, 338);
             coin_icon.m_vertices[3].position = sf::Vector2f(420, 338);
 	    } else {
-			view.setCenter(sf::Vector2f(player.m_center_pos[0], (map_height + (map_height - window_height)) / 2));
-	        text_waluigi.setPosition(player.m_center_pos[0] - (.4 * window_width), 310);
-	        text_coins.setPosition(player.m_center_pos[0] - (.1 * window_width), 310);
-            text_world.setPosition(player.m_center_pos[0] + (.1 * window_width), 310);
-			text_level.setPosition(player.m_center_pos[0] + 20 + (.1 * window_width), 340);
-	        text_time.setPosition(player.m_center_pos[0] + (.35 * window_width), 310);
-            text_seconds.setPosition(player.m_center_pos[0] + (.35 * window_width), 340);
-            coin_icon.m_vertices[0].position = sf::Vector2f(player.m_center_pos[0] - (window_width * .15), 306);
-            coin_icon.m_vertices[1].position = sf::Vector2f(player.m_center_pos[0] + 32 - (window_width * .15), 306);
-            coin_icon.m_vertices[2].position = sf::Vector2f(player.m_center_pos[0] + 32 - (window_width * .15), 338);
-            coin_icon.m_vertices[3].position = sf::Vector2f(player.m_center_pos[0] - (window_width * .15), 338);
+			view.setCenter(sf::Vector2f(player_center_pos[0], (map_height + (map_height - window_height)) / 2));
+	        text_waluigi.setPosition(player_center_pos[0] - (.4 * window_width), 310);
+	        text_coins.setPosition(player_center_pos[0] - (.1 * window_width), 310);
+            text_world.setPosition(player_center_pos[0] + (.1 * window_width), 310);
+			text_level.setPosition(player_center_pos[0] + 20 + (.1 * window_width), 340);
+	        text_time.setPosition(player_center_pos[0] + (.35 * window_width), 310);
+            text_seconds.setPosition(player_center_pos[0] + (.35 * window_width), 340);
+            coin_icon.m_vertices[0].position = sf::Vector2f(player_center_pos[0] - (window_width * .15), 306);
+            coin_icon.m_vertices[1].position = sf::Vector2f(player_center_pos[0] + 32 - (window_width * .15), 306);
+            coin_icon.m_vertices[2].position = sf::Vector2f(player_center_pos[0] + 32 - (window_width * .15), 338);
+            coin_icon.m_vertices[3].position = sf::Vector2f(player_center_pos[0] - (window_width * .15), 338);
 
 	    }
 		
